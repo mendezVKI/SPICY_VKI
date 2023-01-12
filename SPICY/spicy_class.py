@@ -106,6 +106,33 @@ class spicy:
         return
     
     
+
+
+#%% 1. Clustering (this does not depend on the model, but only on the dimension).
+def clustering:
+    
+    
+    return
+
+
+#%% 2. Constraints (this depends on everything)
+def constraints:
+    
+    return
+
+#%% 3. Assembly A, B, C(this depends on everything)
+
+def Assembly:
+    
+    return
+
+
+
+
+
+
+
+
     
     
     
@@ -113,7 +140,8 @@ class spicy:
     
     
     
-#%% The lines below    
+#%% The lines below are coming from Pietro. To be restructured in the new architecture
+
     
     
     
