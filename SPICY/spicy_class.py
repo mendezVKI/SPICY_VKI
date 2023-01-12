@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Apr 27 16:17:44 2021
+Latest update on Thu Jan 12 17:56:06 2023
 
-@author: Pietro
+@author: mendez, ratz, sperotto
 """
 
 # Test
@@ -15,23 +15,54 @@ from SPICY.MeshPoiss import Poisson_solver,Poisson_solver3D,Poisson_solver3DRSA
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
 
+def roundDown(x): 
+    # Round near numbers to avoid that 15 becomes 14.99999999994
+    xtemp=np.copy(x)
+    xtemp[x==0]=1
+    exponent = np.ceil(np.log10(np.abs(xtemp))) 
+    mantissa = x/(10**exponent) #get full precision mantissa
+    # change floor here to ceil or round to round up or to zero
+    mantissa = mantissa.round(decimals=15)
+    xnew=mantissa * 10**exponent
+    xnew[x==0]=0
+    return xnew
+
+#Calculate the scaler
+def scaling(X,scaler):
+    Xnew=[X[0]/scaler]
+    for k in np.arange(1,len(X)):
+        Xnew.append(X[k]/scaler)
+    return Xnew  
+
     
-class mesh_lab:
-    def __init__(self,Velocities,grid_point,ST=None,model='steady'):
+class spicy:
+    def __init__(self,model,Velocities,grid_point,ST=None):
         """
-        Definition of the class mesh_lab 
+        Definition of the class spicy
              
         # The input parameters are 
         ----------------------------------------------------------------------------------------------------------------
         Parameters
         ----------
+        :param model: string
+                   Currently, SPICY supports 4 possible models:
+                       1. 'scalar', to regress a scalar quantity.
+                       2. 'laminar', to regress the velocity field without turbulence modeling.
+                       3.  'RANSI', to regress a velocity field with a RANS model assuming isotropic Reynolds stresses (hence mean(u'**2)) is the only extra expected quantity.
+                            This must be provided as the fourth entry of 'velocities', which becomes
+                       4.  'RANSA', to regress a velocity field with a RANS model without assuming isotropic Reynolds stresses.
+                            this becomes [uu, vv, uv] in 2D and [uu, vv, ww, uv, uw, vw] in 3D.
         :param Velocities: list
                     Is a list of arrays containing [u,v,w] if the flow is 3D otherwise just [u,v]
+                                        
         :param grid_point: list
-                    Is a list of arrays containing the grid point [XG,YG,ZG] if the flow is 3D otherwise just [XG,YG]
-        :param model:(optional) string
-                    other options are RANSI which means that an isotropic Reynolds stresses is expected (eg mean(u'**2)) in the velocities
-                    so the Velocities parameter become [u,v,w,mean(u'**2)]
+                    Is a list of arrays containing the grid point [XG,YG,ZG] in 3D and [XG,YG] in 2D.   
+                
+        :param ST: list
+                    Is a list of arrays collecting Reynolds stresses. This is empty if the model is 'scalar' or 'laminar'.
+                    If the model is RANSI, it contains [uu']. 
+                    If the model is RANSA, it contains [uu, vv, uv] in 2D and [uu, vv, ww, uv, uw, vw] in 3D.                                                   
+                            
         ----------------------------------------------------------------------------------------------------------------
         """
         self.model=model
@@ -50,8 +81,7 @@ class mesh_lab:
             self.w=Velocities[2]
             self.XG=grid_point[0]
             self.YG=grid_point[1]
-            self.ZG=grid_point[2]
-            
+            self.ZG=grid_point[2]            
             
             if model=='RANSI':
             
@@ -76,6 +106,14 @@ class mesh_lab:
         return
     
     
+    
+    
+    
+    
+    
+    
+    
+#%% The lines below    
     
     
     
@@ -347,9 +385,7 @@ class mesh_lab:
       
     def clustering_velocities(self,N,cap,mincluster=[False],el=np.exp(-0.5**2/2),collocation_augmentation=0):
         """
-          calculate the collocation points by using the clustering method
-               
-          
+          calculate the collocation points by using the clustering method           
           ----------------------------------------------------------------------------------------------------------------
           Parameters
           ----------
@@ -363,8 +399,6 @@ class mesh_lab:
           :param el: float (optional),
                      the values that the Gaussian must reach in the nearest collocation point
                      typically beetwen 0.7-0.9.
-                      
-          
           ----------------------------------------------------------------------------------------------------------------
         """
         
@@ -679,8 +713,7 @@ class mesh_lab:
     def extrapolate_pressure(self,Fit_point):
         
         """
-          Compute the pressure in the desired point
-               
+          Compute the pressure in the desired point              
           
           ----------------------------------------------------------------------------------------------------------------
           Parameters
@@ -720,8 +753,7 @@ class mesh_lab:
     def extrapolate_RS(self,Fit_point):
         
         """
-          Compute the Reynolds stresses in the desired point
-               
+          Compute the Reynolds stresses in the desired point               
           
           ----------------------------------------------------------------------------------------------------------------
           Parameters
@@ -774,8 +806,7 @@ class mesh_lab:
     
     def extrapolate_divergence(self,Fit_point):
         """
-          Compute the pressure in the desired point
-               
+          Compute the pressure in the desired point              
           
           ----------------------------------------------------------------------------------------------------------------
           Parameters
@@ -900,7 +931,7 @@ class mesh_lab:
          VX=DER_X.dot(self.w_v)
          del DER_X
     
-    #the derivatives of velocity are evaluated
+         #the derivatives of velocity are evaluated
          DER_Y=Der_RBF_Y(self.X_C_vel,self.Y_C_vel,XFIT,YFIT,self.cvel,self.rcond_vel)
          UY=DER_Y.dot(self.w_u)
          del DER_Y
