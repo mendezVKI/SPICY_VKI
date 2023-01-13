@@ -222,6 +222,7 @@ class mesh_lab:
           BBB=np.unique(np.column_stack((roundDown(self.XDIV),roundDown(self.YDIV))),axis=0)
           self.XDIV=BBB[:,0]
           self.YDIV=BBB[:,1]
+          
       #If the flow is three dimensional
       if self.type=='3D':
           

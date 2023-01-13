@@ -90,7 +90,7 @@ def Clusteringmethod(XG,YG,N,elongation,cap,mincluster=[False]):
          # element inside itself
       sigma1[count==1]=np.amax(sigma1)
       
-     if  k==0:#If it is the first layer, the arrays are initialixed
+     if  k==0:#If it is the first layer the arrays are initialixed
         sigma=sigma1
         X_C=np.copy(X_C1)
         Y_C=np.copy(Y_C1)
