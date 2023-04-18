@@ -1488,17 +1488,9 @@ class spicy:
             A=self.A; B=self.B ; b_1=self.b_1; b_2=self.b_2
             
             # Step 1: Regularize the matrix A
-            try:
-                lambda_m = eigsh(A, 1, sigma = 0.0, return_eigenvectors = False) # smallest eigenvalue
-                lambda_M = eigsh(A, 1, return_eigenvectors = False) # Largest eigenvalue
-                alpha = (lambda_M-K_cond*lambda_m) / (K_cond-1)
-            except:
-                lambda_M = eigsh(A, 1, return_eigenvectors = False) # Largest eigenvalue
-                alpha = (lambda_M) / (K_cond-1)
-                print('Warning, lambda_m could not be computed in A')   
-             
-            # print('Conditioning number of A before regularization: ' + str(np.linalg.cond(A)))
-            alpha = 1e-12*np.linalg.norm(A,np.inf)
+            lambda_M = eigsh(A, 1, return_eigenvectors = False) # Largest eigenvalue
+            alpha = lambda_M / K_cond
+     
             A= A + alpha*np.eye(np.shape(A)[0])
             # print('Conditioning number of A after regularization: ' + str(np.linalg.cond(A)))
             print('Matrix A regularized')
@@ -1512,24 +1504,17 @@ class spicy:
             # Step 4: prepare M 
             M = N.T@B
             
-            # Step 5: Regularize M
-            try:
-                lambda_m = eigsh(M, 1, sigma = 0.0, return_eigenvectors = False) # smallest eigenvalue
-                lambda_M = eigsh(M, 1, return_eigenvectors = False) # Largest eigenvalue
-                alpha = (lambda_M-K_cond*lambda_m) / (K_cond-1)
+            # Step 5 + 6: Regularize M if needed, then compute chol factor
+            try: 
+             L_M, low = linalg.cho_factor(M, overwrite_a = True, check_finite = False, lower = True)
+             print('Chol factor of M WITHOUT regularization')             
             except:
-                print('Warning, lambda_m could not be computed in M')
-                lambda_M = eigsh(M, 1, return_eigenvectors = False) # Largest eigenvalue
-                alpha = (lambda_M) / (K_cond-1)
-            alpha = 1e-12*np.linalg.norm(M,np.inf)
-            # print('Conditioning number of M before regularization: ' + str(np.linalg.cond(M)))
-            M = M + alpha*np.eye(np.shape(M)[0])
-            # print('Conditioning number of M after regularization: ' + str(np.linalg.cond(M)))
-            print('Matrix M computed and regularized')
-            
-            # Step 6: get the chol factor of M    
-            L_M, low = linalg.cho_factor(M, overwrite_a = True, check_finite = False, lower = True)
-        
+             lambda_M = eigsh(M, 1, return_eigenvectors = False) # Largest eigenvalue
+             alpha = lambda_M/K_cond
+             M = M + alpha*np.eye(np.shape(M)[0])
+             L_M, low = linalg.cho_factor(M, overwrite_a = True, check_finite = False, lower = True)
+             print('Chol factor of M WITH regularization')             
+           
             # Step 7: Solve the system for lambda    
             b2star = N.T.dot(b_1) - b_2
             self.lam = linalg.cho_solve((L_M, low), b2star, check_finite = False) * self.rescale
