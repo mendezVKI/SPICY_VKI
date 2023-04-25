@@ -203,6 +203,10 @@ class spicy:
                 distances, indices = nbrs.kneighbors(Centers)
                 sigma1 = distances[:,1]
                 
+                count = np.bincount(y_P, minlength = Clust) 
+                sigma1[sigma1==0]=np.amax(sigma1[sigma1!=0]) 
+                sigma1[count==1]=np.amax(sigma1) 
+                
                 # Pre-assign the collocation points
                 X_C1 = Centers[:,0]
                 Y_C1 = Centers[:,1]
@@ -243,6 +247,10 @@ class spicy:
                 nbrs = NearestNeighbors(n_neighbors=2, algorithm='ball_tree').fit(Centers)
                 distances, indices = nbrs.kneighbors(Centers)
                 sigma1 = distances[:,1]
+                
+                count = np.bincount(y_P, minlength = Clust) 
+                sigma1[sigma1==0]=np.amax(sigma1[sigma1!=0]) 
+                sigma1[count==1]=np.amax(sigma1) 
                 
                 # Pre-assign the collocation points
                 X_C1 = Centers[:,0]
@@ -384,9 +392,12 @@ class spicy:
             self.X_N = np.array([])
             self.Y_N = np.array([])
             self.c_N = np.array([])
+            self.n_x = np.array([])
+            self.n_y = np.array([])
             # In 3D, we must add the z term
             if self.type == '3D':
                 self.Z_N = np.array([])
+                self.n_z = np.array([])
                 
         else: # We have Neumann conditions
             # Check if we have 2D or a 3D problem.
@@ -410,6 +421,45 @@ class spicy:
                 
             else:
                 raise ValueError('Length of Neumann conditions does not fit for Type ' + self.type)
+        
+        # if self.type == '2D':
+        #     # For this, we first get the points where a constraint is set
+        #     X_constr = np.concatenate((self.X_D, self.X_N))
+        #     Y_constr = np.concatenate((self.Y_D, self.Y_N))
+        #     _, valid_idcs = np.unique(np.column_stack((X_constr, Y_constr)), return_index = True, axis = 0)
+        #     # Extract the unique coordinate sets
+        #     X_unique = X_constr[valid_idcs]
+        #     Y_unique = Y_constr[valid_idcs]
+            
+        #     # Here, we stack three different coordinate sets. These are the unique 
+        #     # constraint points, the Dirichlet, Divergance and the Neumann constraints
+        #     points_dir_neu = np.column_stack((X_unique, Y_unique))
+        #     points_dir = np.column_stack((self.X_D, self.Y_D))
+        #     points_neu = np.column_stack((self.X_N, self.Y_N))
+            
+        #     # this creates a boolean array indicating whether a given point in 
+        #     # (X_unqiue, Y_unique) is contained in the Dirichlet conditions
+        #     shared_points_dir_neu = (points_dir_neu[:, None] == points_dir).all(-1).any(1)
+        #     # Note: We do not need to extract the Dirichlet conditions, because
+        #     # we always keep them. Thus, they are not reassigned. However, the
+        #     # remaining Dirichlet and Neumann points must be extracted
+        #     X_N_reduced = X_unique[~shared_points_dir_neu]
+        #     Y_N_reduced = Y_unique[~shared_points_dir_neu]
+            
+        #     # We stack them again as a coordinate set
+        #     points_neu_out = np.column_stack((X_N_reduced, Y_N_reduced))
+        #     # This boolean array indicates which of the original Neumann constraints
+        #     # is still active. This is needed to also extract the relevant values
+        #     # of the constraints. For divergence-free, this is not needed as they 
+        #     # are always 0
+        #     share_points_neumann_before_and_after_reduction = (points_neu_out == points_neu[:, None]).all(-1).any(1)
+        #     # And we extract the final values
+        #     self.X_N = self.X_N[share_points_neumann_before_and_after_reduction]
+        #     self.Y_N = self.Y_N[share_points_neumann_before_and_after_reduction]
+        #     self.n_x = self.n_x[share_points_neumann_before_and_after_reduction]
+        #     self.n_y = self.n_y[share_points_neumann_before_and_after_reduction]
+        #     self.c_N = self.c_N[share_points_neumann_before_and_after_reduction]
+        #     self.n_N = self.X_N.shape[0]
         
         # Finally, we add the extra RBFs in the constraint points if desired
         if extra_RBF == True:
@@ -609,6 +659,61 @@ class spicy:
                 self.X_Div = DIV[0]
                 self.Y_Div = DIV[1]
                 self.Z_Div = DIV[2]
+                
+        # if self.type == '2D':
+        #     # For this, we first get the points where a constraint is set
+        #     X_constr = np.concatenate((self.X_D, self.X_N, self.X_Div))
+        #     Y_constr = np.concatenate((self.Y_D, self.Y_N, self.Y_Div))
+        #     _, valid_idcs = np.unique(np.column_stack((X_constr, Y_constr)), return_index = True, axis = 0)
+        #     # Extract the unique coordinate sets
+        #     X_unique = X_constr[valid_idcs]
+        #     Y_unique = Y_constr[valid_idcs]
+            
+        #     # Here, we stack three different coordinate sets. These are the unique 
+        #     # constraint points, the Dirichlet, Divergance and the Neumann constraints
+        #     points_dir_div_neu = np.column_stack((X_unique, Y_unique))
+        #     points_dir = np.column_stack((self.X_D, self.Y_D))
+        #     points_neu = np.column_stack((self.X_N, self.Y_N))
+        #     points_div = np.column_stack((self.X_Div, self.Y_Div))
+            
+        #     # this creates a boolean array indicating whether a given point in 
+        #     # (X_unqiue, Y_unique) is contained in the Dirichlet conditions
+        #     shared_points_dir_div_neu = (points_dir_div_neu[:, None] == points_dir).all(-1).any(1)
+        #     # Note: We do not need to extract the Dirichlet conditions, because
+        #     # we always keep them. Thus, they are not reassigned. However, the
+        #     # remaining Dirichlet and Neumann points must be extracted
+        #     X_Div_Neu = X_unique[~shared_points_dir_div_neu]
+        #     Y_Div_Neu = Y_unique[~shared_points_dir_div_neu]
+            
+        #     # We stack them again as a coordinate set
+        #     points_div_neu = np.column_stack((X_Div_Neu, Y_Div_Neu))
+        #     # And extract a boolena array indicating whether the points in that set
+        #     # are also contained in the divergence-free set
+        #     shared_points_div_neu = (points_div_neu[:, None] == points_div).all(-1).any(1)
+        #     # We extract and assign the remaining divergence-free constraints
+        #     self.X_Div = X_Div_Neu[shared_points_div_neu]
+        #     self.Y_Div = Y_Div_Neu[shared_points_div_neu]
+        #     self.n_Div = self.X_Div.shape[0]
+        #     # as well as the remaining Neumann conditions. This the set of points
+        #     # which are not contained in either the Dirichlet or divergence-free points
+        #     X_N_reduced = X_Div_Neu[~shared_points_div_neu]
+        #     Y_N_reduced = Y_Div_Neu[~shared_points_div_neu]
+            
+        #     # We stack them again as a coordinate set
+        #     points_neu_out = np.column_stack((X_N_reduced, Y_N_reduced))
+        #     # This boolean array indicates which of the original Neumann constraints
+        #     # is still active. This is needed to also extract the relevant values
+        #     # of the constraints. For divergence-free, this is not needed as they 
+        #     # are always 0
+        #     share_points_neumann_before_and_after_reduction = (points_neu_out == points_neu[:, None]).all(-1).any(1)
+        #     # And we extract the final values
+        #     self.X_N = self.X_N[share_points_neumann_before_and_after_reduction]
+        #     self.Y_N = self.Y_N[share_points_neumann_before_and_after_reduction]
+        #     self.n_x = self.n_x[share_points_neumann_before_and_after_reduction]
+        #     self.n_y = self.n_y[share_points_neumann_before_and_after_reduction]
+        #     self.c_N_X = self.c_N_X[share_points_neumann_before_and_after_reduction]
+        #     self.c_N_Y = self.c_N_Y[share_points_neumann_before_and_after_reduction]
+        #     self.n_N = self.X_N.shape[0]
         
         # Finally, we add the extra RBFs in the constraint points if desired
         if extra_RBF == True:
@@ -724,7 +829,7 @@ class spicy:
     # the regression one inlcudes a potential penalty of a divergence free flow.
 
     # 4.1. Poisson solver
-    def Assembly_Poisson(self, source_terms, n_hb=5):
+    def Assembly_Poisson(self, n_hb=0):
         """
         This function assembly the matrices A, B, C, D from the paper.
         TODO. Currently implemented only for model='scalar'
@@ -762,9 +867,9 @@ class spicy:
         
         """   
         
-        assert type(source_terms) == np.ndarray, 'Source terms must be a 1D numpy array'
+        # assert type(source_terms) == np.ndarray, 'Source terms must be a 1D numpy array'
         assert type(n_hb) == int, 'Number of harmonic basis must be an integer'
-        assert len(source_terms.shape) == 1, 'Source terms must be a 1D numpy array'
+        # assert len(source_terms.shape) == 1, 'Source terms must be a 1D numpy array'
         
         # Assign the number of harmonic basis functions
         self.n_hb = n_hb
@@ -779,6 +884,7 @@ class spicy:
             if self.type == '2D': # 2D           
                 # get the rescaling factor by normalizing the r.h.s. of the source terms
                 # TODO This should maybe also consider the B.C.?
+                source_terms = self.u
                 self.rescale = max(np.max(source_terms), -np.max(-source_terms))    
                 
                 # Approach 1: we build A, B, b1, b2 as in the article from Sperotto
@@ -827,7 +933,10 @@ class spicy:
             elif self.type == '3D': # 3D
                 # get the rescaling factor by normalizing the r.h.s. of the source terms
                 # TODO This should maybe also consider the B.C.?
-                self.rescale = max(np.max(source_terms), -np.max(-source_terms))  
+                source_terms = self.u
+                self.rescale = max(np.max(source_terms), -np.max(-source_terms))   
+                if np.abs(self.rescale) < 1e-10:
+                    self.rescale = 1
                 
                 # Approach 1: we build A, B, b1, b2 as in the article from Sperotto
                 L = np.hstack((
@@ -838,7 +947,7 @@ class spicy:
                     )) 
                 # Then A and b1 are :
                 self.A = 2*L.T@L
-                self.b_1 = 2*L.T.dot(source_terms)/self.rescale
+                self.b_1 = 2*L.T.dot(source_terms) / self.rescale
                 
                 # Check for Dirichlet
                 if self.n_D != 0:
@@ -857,21 +966,23 @@ class spicy:
                 if self.n_N != 0: # We have Neumann conditions
                     # Compute Phi_x on X_N
                     Matrix_Phi_3D_X_N_der_x = np.hstack((
-                        Phi_H_3D_x(self.X_N, self.Y_N, self.n_hb),
-                        Phi_RBF_3D_x(self.X_N, self.Y_N, self.X_C, self.Y_C, self.c_k, self.basis)
+                        Phi_H_3D_x(self.X_N, self.Y_N, self.Z_N, self.n_hb),
+                        Phi_RBF_3D_x(self.X_N, self.Y_N, self.Z_N,
+                                     self.X_C, self.Y_C, self.Z_C,
+                                     self.c_k, self.basis)
                         ))
                     # Compute Phi_y on X_N
                     Matrix_Phi_3D_X_N_der_y = np.hstack((
                         Phi_H_3D_y(self.X_N, self.Y_N, self.Z_N, self.n_hb),
                         Phi_RBF_3D_y(self.X_N, self.Y_N, self.Z_N,
-                                     self.X_C, self.Y_C, self.Z_N,
+                                     self.X_C, self.Y_C, self.Z_C,
                                      self.c_k, self.basis)
                         ))
                     # Compute Phi_z on X_N
                     Matrix_Phi_3D_X_N_der_z = np.hstack((
                         Phi_H_3D_z(self.X_N, self.Y_N, self.Z_N, self.n_hb),
                         Phi_RBF_3D_z(self.X_N, self.Y_N, self.Z_N,
-                                     self.X_C, self.Y_C, self.Z_N,
+                                     self.X_C, self.Y_C, self.Z_C,
                                      self.c_k, self.basis)
                         ))
                     # Compute Phi_n on X_N
@@ -892,7 +1003,7 @@ class spicy:
     
     
     # 4.2. Regression
-    def Assembly_Regression(self, n_hb=5, alpha_div=None):
+    def Assembly_Regression(self, n_hb=0, alpha_div=None):
         """
         This function assembly the matrices A, B, C, D from the paper.
         
@@ -946,7 +1057,130 @@ class spicy:
         
         # Scalar model
         if self.model == 'scalar':
-            raise NotImplementedError('Scalar currently not implemented')
+            if self.type == '2D': # 2D
+                # define the rescaling factor which is done based on the maximum
+                # absolute velocity that is available in u and v 
+                self.rescale = self.u[np.argmax(np.abs(self.u))]
+                
+                # Check for Dirichlet
+                if self.n_D !=0: # We have Dirichlet conditions
+                    # Compute Phi on X_D (16)
+                    Matrix_D = np.hstack((
+                        Phi_H_2D(self.X_D, self.Y_D, self.n_hb),
+                        Phi_RBF_2D(self.X_D, self.Y_D, self.X_C, self.Y_C, self.c_k, self.basis)
+                        ))
+                else: # No Dirichlet conditions
+                    # initialize the empty array
+                    Matrix_D = np.empty((0, self.n_b))
+                
+                # Check for Neumann
+                if self.n_N != 0: # We have Neumann conditions
+                    # Compute Phi_x on X_N
+                    Matrix_Phi_2D_X_N_der_x = np.hstack((
+                        Phi_H_2D_x(self.X_N, self.Y_N, self.n_hb),
+                        Phi_RBF_2D_x(self.X_N, self.Y_N,
+                                      self.X_C, self.Y_C,
+                                      self.c_k, self.basis)
+                        ))
+                    # Compute Phi_y on X_N
+                    Matrix_Phi_2D_X_N_der_y = np.hstack((
+                        Phi_H_2D_y(self.X_N, self.Y_N, self.n_hb),
+                        Phi_RBF_2D_y(self.X_N, self.Y_N,
+                                      self.X_C, self.Y_C,
+                                      self.c_k, self.basis)
+                        ))
+                    # Compute Phi_n on X_N (equation (18))
+                    Matrix_D_N = Matrix_Phi_2D_X_N_der_x*self.n_x[:, np.newaxis] +\
+                                 Matrix_Phi_2D_X_N_der_y*self.n_y[:, np.newaxis]
+                else: # No Neumann conditions
+                    # initialize the empty array
+                    Matrix_D_N = np.empty((0,self.n_b))
+                
+                # We can now assemble the matrix independent of what combinations
+                # of Dirichlet and Neumann we have
+                self.B = np.vstack((Matrix_D, Matrix_D_N)).T
+                # We do the same for b_2, as this can also be done for every case
+                self.b_2 = np.concatenate((self.c_D, self.c_N)) / self.rescale
+                
+                # We compute Phi on all node points X
+                Matrix_Phi_2D_X = np.hstack((
+                    Phi_H_2D(self.X_G, self.Y_G, self.n_hb),
+                    Phi_RBF_2D(self.X_G, self.Y_G, self.X_C, self.Y_C, self.c_k, self.basis)
+                    ))
+                # block structure of A as in equation(10)
+                PhiT_dot_Phi = Matrix_Phi_2D_X.T.dot(Matrix_Phi_2D_X)
+                self.A = 2*Matrix_Phi_2D_X.T.dot(Matrix_Phi_2D_X)
+                # compute b_1
+                self.b_1 = 2*Matrix_Phi_2D_X.T.dot(self.u) / self.rescale
+                
+            elif self.type == '3D':   
+                # define the rescaling factor which is done based on the maximum
+                # absolute velocity that is available in u and v 
+                self.rescale = self.u[np.argmax(np.abs(self.u))]
+                
+                # Check for Dirichlet
+                if self.n_D !=0: # We have Dirichlet conditions
+                    # Compute Phi on X_D (16)
+                    Matrix_D = np.hstack((
+                        Phi_H_3D(self.X_D, self.Y_D, self.Z_D, self.n_hb),
+                        Phi_RBF_3D(self.X_D, self.Y_D, self.Z_D,
+                                   self.X_C, self.Y_C, self.Z_C,
+                                   self.c_k, self.basis)
+                        ))
+                else: # No Dirichlet conditions
+                    # initialize the empty array
+                    Matrix_D = np.empty((0, self.n_b))
+                
+                # Check for Neumann
+                if self.n_N != 0: # We have Neumann conditions
+                    # Compute Phi_x on X_N
+                    Matrix_Phi_3D_X_N_der_x = np.hstack((
+                        Phi_H_3D_x(self.X_N, self.Y_N, self.Z_N, self.n_hb),
+                        Phi_RBF_3D_x(self.X_N, self.Y_N, self.Z_N,
+                                      self.X_C, self.Y_C, self.Z_C,
+                                      self.c_k, self.basis)
+                        ))
+                    # Compute Phi_y on X_N
+                    Matrix_Phi_3D_X_N_der_y = np.hstack((
+                        Phi_H_3D_y(self.X_N, self.Y_N, self.Z_N, self.n_hb),
+                        Phi_RBF_3D_y(self.X_N, self.Y_N, self.Z_N,
+                                      self.X_C, self.Y_C, self.Z_C,
+                                      self.c_k, self.basis)
+                        ))
+                    # Compute Phi_z on X_N
+                    Matrix_Phi_3D_X_N_der_z = np.hstack((
+                        Phi_H_3D_y(self.X_N, self.Y_N, self.Z_N, self.n_hb),
+                        Phi_RBF_3D_y(self.X_N, self.Y_N, self.Z_N,
+                                      self.X_C, self.Y_C, self.Z_C,
+                                      self.c_k, self.basis)
+                        ))
+                    # Compute Phi_n on X_N (equation (18))
+                    Matrix_D_N = Matrix_Phi_3D_X_N_der_x*self.n_x[:, np.newaxis] +\
+                                 Matrix_Phi_3D_X_N_der_y*self.n_y[:, np.newaxis] +\
+                                 Matrix_Phi_3D_X_N_der_z*self.n_z[:, np.newaxis]
+                else: # No Neumann conditions
+                    # initialize the empty array
+                    Matrix_D_N = np.empty((0,self.n_b))
+                
+                # We can now assemble the matrix independent of what combinations
+                # of Dirichlet and Neumann we have
+                self.B = np.vstack((Matrix_D, Matrix_D_N)).T
+                # We do the same for b_2, as this can also be done for every case
+                self.b_2 = np.concatenate((self.c_D, self.c_N)) / self.rescale
+                
+                # We compute Phi on all node points X
+                Matrix_Phi_3D_X = np.hstack((
+                    Phi_H_3D(self.X_G, self.Y_G, self.Z_G, self.n_hb),
+                    Phi_RBF_3D(self.X_G, self.Y_G, self.Z_G, 
+                               self.X_C, self.Y_C, self.Z_C,
+                               self.c_k, self.basis)
+                    ))
+                # block structure of A as in equation(10)
+                PhiT_dot_Phi = Matrix_Phi_3D_X.T.dot(Matrix_Phi_2D_X)
+                self.A = 2*Matrix_Phi_3D_X.T.dot(Matrix_Phi_2D_X)
+                # compute b_1
+                self.b_1 = 2*Matrix_Phi_3D_X.T.dot(self.u) / self.rescale
+                
         # Laminar model
         elif self.model == 'laminar':  
             # we need to check whether we are 2D or 3D laminar as this changes the assignment
@@ -1234,7 +1468,7 @@ class spicy:
                     # For the diagonal
                     PhiXT_dot_PhiX = Matrix_Phi_3D_X_der_x.T.dot(Matrix_Phi_3D_X_der_x)
                     PhiYT_dot_PhiY = Matrix_Phi_3D_X_der_y.T.dot(Matrix_Phi_3D_X_der_y) 
-                    PhiZT_dot_PhiZ = Matrix_Phi_3D_X_der_y.T.dot(Matrix_Phi_3D_X_der_y) 
+                    PhiZT_dot_PhiZ = Matrix_Phi_3D_X_der_z.T.dot(Matrix_Phi_3D_X_der_z) 
                     # For the off-diagonal elements
                     PhiXT_dot_PhiY = Matrix_Phi_3D_X_der_x.T.dot(Matrix_Phi_3D_X_der_y)
                     PhiXT_dot_PhiZ = Matrix_Phi_3D_X_der_x.T.dot(Matrix_Phi_3D_X_der_z)
@@ -1868,67 +2102,67 @@ class spicy:
           number k_cond. For this, we compute the max and the min eigenvalue.
         """   
     
-        # Assign variables for debugging purposes
-        A=self.A; B=self.B ; b_1=self.b_1; b_2=self.b_2
+        # Two options: 
+        # 1.: We have constraints, then B and b_2 are not empty and we go for Schur complements
+        # 2.: We do not have constraints, then we only need to solve A*w = b_1
+        if (self.B.size == 0) and (self.b_2.size == 0):
+            print('Solving without constriaints')
+            
+            # Step 1: Regularize the matrix A
+            lambda_A = eigsh(self.A, 1, return_eigenvectors=False) # Largest eigenvalue
+            alpha = lambda_A / K_cond
+            self.A = self.A + alpha*np.eye(np.shape(self.A)[0])
+            print('Matrix A regularized')
+            
+            # Step 2: Cholesky Decomposition of A 
+            L_A, low = linalg.cho_factor(self.A, overwrite_a = True, check_finite = False, lower = True)
+            
+            # Step 3: Solve for w
+            self.w = linalg.cho_solve((L_A, low), self.b_1, check_finite = False) * self.rescale
+            
+            
+        elif (self.B.size != 0) and (self.b_2.size != 0):
+            print('Solving with constriaints')
+            
+            # Step 1: Regularize the matrix A
+            lambda_M = eigsh(self.A, 1, return_eigenvectors=False) # Largest eigenvalue
+            alpha = lambda_M / K_cond
+            self.A = self.A + alpha*np.eye(np.shape(self.A)[0])
+            print('Matrix A regularized')
+            
+            # Step 2: Cholesky Decomposition of A    
+            L_A, low = linalg.cho_factor(self.A, overwrite_a=True, check_finite=False, lower=True)
+            
+            # Step 3: Solve for N
+            N = linalg.cho_solve((L_A,low), self.B, check_finite=False)
+            
+            # Step 4: prepare M 
+            M = N.T@self.B
+            
+            # Step 5 + 6: Regularize M if needed, then compute chol factor
+            try: 
+                # try without regularization
+                L_M, low = linalg.cho_factor(M, overwrite_a=True, check_finite=False, lower=True)
+                print('Chol factor of M WITHOUT regularization')             
+            except:
+                # if it does not work, regularize M the same way as for A
+                lambda_M = eigsh(M, 1, return_eigenvectors=False) # Largest eigenvalue
+                alpha = lambda_M / K_cond
+                M = M + alpha*np.eye(np.shape(M)[0])
+                L_M, low = linalg.cho_factor(M, overwrite_a = True, check_finite = False, lower = True)
+                print('Chol factor of M WITH regularization')             
+           
+            # Step 7: Solve the system for lambda    
+            b2star = N.T.dot(self.b_1) - self.b_2
+            self.lam = linalg.cho_solve((L_M, low), b2star, check_finite = False)
+            print('Lambdas computed')
         
-        # Step 1: Regularize the matrix A
-        try:
-            lambda_m = eigsh(A, 1, sigma = 0.0, return_eigenvectors = False) # smallest eigenvalue
-            lambda_M = eigsh(A, 1, return_eigenvectors = False) # Largest eigenvalue
-            alpha = (lambda_M-K_cond*lambda_m) / (K_cond-1)
-        except:
-            lambda_M = eigsh(A, 1, return_eigenvectors = False) # Largest eigenvalue
-            alpha = (lambda_M) / (K_cond-1)
-            print('Warning, lambda_m could not be computed in A')   
-        
-        alpha = 1e-12*np.linalg.norm(A, np.inf) 
-        # print('Conditioning number of A before regularization: ' + str(np.linalg.cond(A)))
-        A = A + alpha*np.eye(np.shape(A)[0])
-        # print('Conditioning number of A after regularization: ' + str(np.linalg.cond(A)))
-        print('Matrix A regularized')
-        
-        # Step 2: Cholesky Decomposition of A    
-        L_A, low = linalg.cho_factor(A, overwrite_a = True, check_finite = False, lower = True)
-        
-        # Step 3: Solve for N
-        N = linalg.cho_solve((L_A,low),B,check_finite=False)
-        
-        # Step 4: prepare M 
-        M = N.T@B
-        
-        # Step 5: Regularize M
-        try:
-            lambda_m = eigsh(M, 1, sigma = 0.0, return_eigenvectors = False) # smallest eigenvalue
-            lambda_M = eigsh(M, 1, return_eigenvectors = False) # Largest eigenvalue
-            alpha = (lambda_M-K_cond*lambda_m) / (K_cond-1)
-        except:
-            print('Warning, lambda_m could not be computed in M')
-            lambda_M = eigsh(M, 1, return_eigenvectors = False) # Largest eigenvalue
-            alpha = (lambda_M) / (K_cond-1)
-        alpha = 1e-12*np.linalg.norm(M,np.inf)
-        # print('Conditioning number of M before regularization: ' + str(np.linalg.cond(M)))
-        M = M + alpha*np.eye(np.shape(M)[0])
-        # print('Conditioning number of M after regularization: ' + str(np.linalg.cond(M)))
-        print('Matrix M computed and regularized')
-        
-        # Step 6: get the chol factor of M    
-        L_M, low = linalg.cho_factor(M, overwrite_a = True, check_finite = False, lower = True)
-    
-        # Step 7: Solve the system for lambda    
-        b2star = N.T.dot(b_1) - b_2
-        self.lam = linalg.cho_solve((L_M, low), b2star, check_finite = False)
-        print('Lambdas computed')
-    
-        # Step 8: Solve for w.
-        b1_star = b_1 - B.dot(self.lam)
-        self.w = linalg.cho_solve((L_A, low), b1_star, check_finite = False)
-        self.w = self.w * self.rescale
-        print('w computed')
-        
-        # You could estimate the error in the solutions:
-        # err_w=np.linalg.norm(A.dot(self.w)+B.dot(self.lam)-b_1)    
-        # err_lam=np.linalg.norm(B.T.dot(self.w)-b_2)    
-    
+            # Step 8: Solve for w.
+            b1_star = self.b_1 - self.B.dot(self.lam)
+            self.w = linalg.cho_solve((L_A, low), b1_star, check_finite=False) * self.rescale
+            print('w computed')
+        else:
+            raise ValueError('b_1 or B is empty while the other is not, check your constraints!')
         return 
 
     # 6. Evaluate solution on arbitrary grid
@@ -1989,6 +2223,8 @@ class spicy:
             X_P = grid[0]
             Y_P = grid[1]
             Z_P = grid[2]
+            # number of points on the new grid
+            n_p = X_P.shape[0]
             
             # Check what model type we have
             if self.model == 'scalar': # Scalar
@@ -2076,7 +2312,46 @@ class spicy:
             source_term = -rho*(dUdX**2+2*dUdY*dVdX+dVdY**2)
             
         elif len(grid) == 3 and self.type == '3D':
-            raise NotImplementedError('3D data currently not supported')
+            # assign the grid points in X and Y
+            X_P = grid[0]
+            Y_P = grid[1]
+            Z_P = grid[2]
+            W_u = self.w[0*self.n_b:1*self.n_b]
+            W_v = self.w[1*self.n_b:2*self.n_b]
+            W_w = self.w[2*self.n_b:3*self.n_b]
+            
+            # We compute Phi_x on X_P
+            Matrix_Phi_3D_X_P_der_x = np.hstack((
+                Phi_H_3D_x(X_P, Y_P, Z_P, self.n_hb),
+                Phi_RBF_3D_x(X_P, Y_P, Z_P, self.X_C, self.Y_C, self.Z_C, self.c_k, self.basis)
+                ))
+            # We compute the derivatives of the velocity field along x
+            dUdX = Matrix_Phi_3D_X_P_der_x.dot(W_u)
+            dVdX = Matrix_Phi_3D_X_P_der_x.dot(W_v)
+            dWdX = Matrix_Phi_3D_X_P_der_x.dot(W_w)
+            
+            # We compute Phi_y on X_P
+            Matrix_Phi_3D_X_P_der_y = np.hstack((
+                Phi_H_3D_y(X_P, Y_P, Z_P, self.n_hb),
+                Phi_RBF_3D_y(X_P, Y_P, Z_P, self.X_C, self.Y_C, self.Z_C, self.c_k, self.basis)
+                ))
+            # We compute the derivatives of the velocity field along y
+            dUdY = Matrix_Phi_3D_X_P_der_y.dot(W_u)
+            dVdY = Matrix_Phi_3D_X_P_der_y.dot(W_v)
+            dWdY = Matrix_Phi_3D_X_P_der_y.dot(W_w)
+            
+            # We compute Phi_z on X_P
+            Matrix_Phi_3D_X_P_der_z = np.hstack((
+                Phi_H_3D_z(X_P, Y_P, Z_P, self.n_hb),
+                Phi_RBF_3D_z(X_P, Y_P, Z_P, self.X_C, self.Y_C, self.Z_C, self.c_k, self.basis)
+                ))
+            # We compute the derivatives of the velocity field along y
+            dUdZ = Matrix_Phi_3D_X_P_der_z.dot(W_u)
+            dVdZ = Matrix_Phi_3D_X_P_der_z.dot(W_v)
+            dWdZ = Matrix_Phi_3D_X_P_der_z.dot(W_w)
+        
+            #forcing term is evaluated
+            source_term = -rho*(dUdX**2+dVdY**2+dWdZ**2 + 2*dUdY*dVdX + 2*dUdZ*dWdX + 2*dVdZ*dWdY)
             
         else:
             raise ValueError('Length of Grid is invalid for Type ' + self.type)
@@ -2172,7 +2447,75 @@ class spicy:
             P_Neu = P_N_x * n_x + P_N_y * n_y
             
         elif len(grid) == 3 and self.type == '3D':
-            raise NotImplementedError('3D data currently not supported')
+            # Assign the grid
+            X_N = grid[0]
+            Y_N = grid[1]
+            Z_N = grid[2]
+            # Assign the normals
+            n_x = normals[0]
+            n_y = normals[1]
+            n_z = normals[2]
+            # Assign the weights
+            W_u = self.w[0*self.n_b:1*self.n_b]
+            W_v = self.w[1*self.n_b:2*self.n_b]
+            W_w = self.w[2*self.n_b:3*self.n_b]
+            # Compute the matrix Phi_x on X_N
+            Matrix_Phi_3D_X_N_der_x = np.hstack((
+                Phi_H_3D_x(X_N, Y_N, Z_N, self.n_hb),
+                Phi_RBF_3D_x(X_N, Y_N, Z_N, self.X_C, self.Y_C, self.Z_C, self.c_k, self.basis)
+                ))
+            # Compute the derivatives along x
+            dUdX = Matrix_Phi_3D_X_N_der_x.dot(W_u)
+            dVdX = Matrix_Phi_3D_X_N_der_x.dot(W_v)
+            dWdX = Matrix_Phi_3D_X_N_der_x.dot(W_w)
+            
+            # Compute the matrix Phi_y on X_N
+            Matrix_Phi_3D_X_N_der_y = np.hstack((
+                Phi_H_3D_y(X_N, Y_N, Z_N, self.n_hb),
+                Phi_RBF_3D_y(X_N, Y_N, Z_N, self.X_C, self.Y_C, self.Z_C, self.c_k, self.basis)
+                ))
+            # Compute the derivatives along y
+            dUdY = Matrix_Phi_3D_X_N_der_y.dot(W_u)
+            dVdY = Matrix_Phi_3D_X_N_der_y.dot(W_v)
+            dWdY = Matrix_Phi_3D_X_N_der_y.dot(W_w)
+            
+            # Compute the matrix Phi_z on X_N
+            Matrix_Phi_3D_X_N_der_z = np.hstack((
+                Phi_H_3D_z(X_N, Y_N, Z_N, self.n_hb),
+                Phi_RBF_3D_z(X_N, Y_N, Z_N, self.X_C, self.Y_C, self.Z_C, self.c_k, self.basis)
+                ))
+            # Compute the derivatives along y
+            dUdZ = Matrix_Phi_3D_X_N_der_z.dot(W_u)
+            dVdZ = Matrix_Phi_3D_X_N_der_z.dot(W_v)
+            dWdZ = Matrix_Phi_3D_X_N_der_z.dot(W_w)
+            
+            # Compute the matrix Phi on X_N
+            Matrix_Phi_3D_X_N = np.hstack((
+                Phi_H_3D(X_N, Y_N, Z_N, self.n_hb),
+                Phi_RBF_3D(X_N, Y_N, Z_N, self.X_C, self.Y_C, self.Z_C, self.c_k, self.basis)
+                ))
+            # Compute the velocities
+            U = Matrix_Phi_3D_X_N.dot(W_u)
+            V = Matrix_Phi_3D_X_N.dot(W_v)
+            W = Matrix_Phi_3D_X_N.dot(W_w)
+            
+            # Compute the Laplacian on X_N
+            L_X_N = np.hstack((
+                Phi_H_3D_Laplacian(X_N, Y_N, Z_N, self.n_hb),
+                Phi_RBF_3D_Laplacian(X_N, Y_N, Z_N, self.X_C, self.Y_C, self.Z_C, self.c_k, self.basis)
+                ))
+            # Compute the Laplacian for U and V
+            L_U = L_X_N.dot(W_u)
+            L_V = L_X_N.dot(W_v)
+            L_W = L_X_N.dot(W_w)
+            
+            # Compute the pressure normals
+            P_N_x = mu*L_U - rho * (U*dUdX + V*dUdY + W*dUdZ)
+            P_N_y = mu*L_V - rho * (U*dVdX + V*dVdY + W*dVdZ)
+            P_N_z = mu*L_W - rho * (U*dWdX + V*dWdY + W*dWdZ)
+            
+            # Multiply with the normals to get the projected pressure
+            P_Neu = P_N_x * n_x + P_N_y * n_y + P_N_z * n_z
             
         else:
             raise ValueError('Length of Grid is invalid for Type ' + self.type)
