@@ -193,8 +193,8 @@ class spicy:
                 Clust = int(np.ceil(self.n_p / n_K[l])) 
                 # Initialize the cluster function
                 model = MiniBatchKMeans(n_clusters=Clust, random_state=0)    
-                # Run the clustering and return the indices
-                y_P = model.fit_predict(Data_matrix)
+                # Run the clustering and return the indices (optional)
+                #y_P = model.fit_predict(Data_matrix)
                 # Obtaining the centers of the points
                 Centers = model.cluster_centers_
                 
@@ -234,7 +234,7 @@ class spicy:
                 Clust = int(np.ceil(self.n_p / n_K[l])) 
                 # Initialize the cluster function
                 model = MiniBatchKMeans(n_clusters=Clust, random_state=0)    
-                # Run the clustering and return the indices
+                # Run the clustering and return the indices (optional)
                 y_P = model.fit_predict(Data_matrix)
                 # Obtaining the centers of the points
                 Centers = model.cluster_centers_
