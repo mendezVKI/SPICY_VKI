@@ -685,8 +685,8 @@ class spicy:
                 axs[0].plot(self.X_N, self.Y_N,'bs')
                 # if self.model == 'laminar':
                 #     axs[0].plot(self.X_Div, self.Y_Div, 'gd')
-                axs[0].set_xlim(-0.52, 0.52)
-                axs[0].set_ylim(-0.52, 0.52)
+               # axs[0].set_xlim(-0.52, 0.52)
+               # axs[0].set_ylim(-0.52, 0.52)
  
                 # second plot is the distribution of diameters:
                 axs[1].stem(self.d_k)
@@ -738,7 +738,7 @@ class spicy:
             This vector contains the values for the source term on all the given points (term s in eq 27).
             To solve the Laplace equation, it should be a vector of zeros.
             To solve the Poisson equation for the pressure, this is the RHS of eq.21.
-            In any case, the specification of the RHS is done outside the assmebly function.
+            In any case, the specification of the RHS is done outside the assembly function.
              
         :param n_hb: string (currently not active)
             When solving the Poisson equation, global basis elements such as polynomials or series
@@ -779,8 +779,12 @@ class spicy:
             if self.type == '2D': # 2D           
                 # get the rescaling factor by normalizing the r.h.s. of the source terms
                 # TODO This should maybe also consider the B.C.?
-                self.rescale = max(np.max(source_terms), -np.max(-source_terms))    
-                
+                R=max(np.max(source_terms), -np.max(-source_terms))
+                if R == 0:
+                 self.rescale = 1    
+                else:
+                 self.rescale=R 
+                 
                 # Approach 1: we build A, B, b1, b2 as in the article from Sperotto
                 L = np.hstack((
                     Phi_H_2D_Laplacian(self.X_G, self.Y_G, self.n_hb),
@@ -1178,7 +1182,7 @@ class spicy:
                     [np.zeros((self.n_N, self.n_b)), np.zeros((self.n_N, self.n_b)), Matrix_Phi_N]
                     ])
 
-                # We can now assemble the matrix independent of what combinations
+                # We can now assemble the matrix regardless of what combinations
                 # of Dirichlet and Neumann we have
                 self.B = np.vstack((Matrix_D_nabla, Matrix_D, Matrix_D_N)).T
                 # We do the same for b_2, as this can also be done for every case
