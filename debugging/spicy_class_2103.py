@@ -29,7 +29,7 @@ from scipy import linalg
     
 class spicy:
     # 1. Initialize the class with the data
-    def __init__(self, data, grid_point, basis='gauss', ST=None, method='global'):
+    def __init__(self, data, grid_point, basis='gauss', ST=None, method='global', problem='regression'):
         """
         Initialization of an instance of the spicy class.
              
@@ -88,17 +88,18 @@ class spicy:
         """
         
         # Check the input is correct
-        assert type(data) == list, 'Input data must be a list'
+        assert type(data) == list, '\'data\' must be a list'
         assert type(grid_point) == list, 'Input grid_point must be a list'
-        assert type(basis) == str, 'Basis must be a string'
-        assert ST == None or type(ST) == list, 'ST must be a string or a list'
+        assert type(basis) == str, '\'basis\' must be a string'
+        assert ST == None or type(ST) == list, '\'ST\' must be a string or a list'
+        assert type(problem) == str, '\'problem\' must be a string'
         
         # Assign the basis
         if basis == 'gauss' or basis == 'c4':
             self.basis = basis
         else:
             raise ValueError('Wrong basis type, must be either \'gauss\' or \'c4\'')
-        
+                
         self.method = method      
         
         # Check the length of the grid points to see if it is 2D or 3D
@@ -205,6 +206,10 @@ class spicy:
                 distances, indices = nbrs.kneighbors(Centers)
                 sigma1 = distances[:,1]
                 
+                count = np.bincount(y_P, minlength = Clust) 
+                sigma1[sigma1==0]=np.amax(sigma1[sigma1!=0]) 
+                sigma1[count==1]=np.amax(sigma1) 
+                
                 # Pre-assign the collocation points
                 X_C1 = Centers[:,0]
                 Y_C1 = Centers[:,1]
@@ -245,6 +250,10 @@ class spicy:
                 nbrs = NearestNeighbors(n_neighbors=2, algorithm='ball_tree').fit(Centers)
                 distances, indices = nbrs.kneighbors(Centers)
                 sigma1 = distances[:,1]
+                
+                count = np.bincount(y_P, minlength = Clust) 
+                sigma1[sigma1==0]=np.amax(sigma1[sigma1!=0]) 
+                sigma1[count==1]=np.amax(sigma1) 
                 
                 # Pre-assign the collocation points
                 X_C1 = Centers[:,0]
@@ -385,10 +394,13 @@ class spicy:
             self.n_N = 0
             self.X_N = np.array([])
             self.Y_N = np.array([])
+            self.n_x = np.array([])
+            self.n_y = np.array([])
             self.c_N = np.array([])
             # In 3D, we must add the z term
             if self.type == '3D':
                 self.Z_N = np.array([])
+                self.n_z = np.array([])
                 
         else: # We have Neumann conditions
             # Check if we have 2D or a 3D problem.
@@ -412,6 +424,45 @@ class spicy:
                 
             else:
                 raise ValueError('Length of Neumann conditions does not fit for Type ' + self.type)
+        
+        if self.type == '2D':
+            # For this, we first get the points where a constraint is set
+            X_constr = np.concatenate((self.X_D, self.X_N))
+            Y_constr = np.concatenate((self.Y_D, self.Y_N))
+            _, valid_idcs = np.unique(np.column_stack((X_constr, Y_constr)), return_index = True, axis = 0)
+            # Extract the unique coordinate sets
+            X_unique = X_constr[valid_idcs]
+            Y_unique = Y_constr[valid_idcs]
+            
+            # Here, we stack three different coordinate sets. These are the unique 
+            # constraint points, the Dirichlet, Divergance and the Neumann constraints
+            points_dir_neu = np.column_stack((X_unique, Y_unique))
+            points_dir = np.column_stack((self.X_D, self.Y_D))
+            points_neu = np.column_stack((self.X_N, self.Y_N))
+            
+            # this creates a boolean array indicating whether a given point in 
+            # (X_unqiue, Y_unique) is contained in the Dirichlet conditions
+            shared_points_dir_neu = (points_dir_neu[:, None] == points_dir).all(-1).any(1)
+            # Note: We do not need to extract the Dirichlet conditions, because
+            # we always keep them. Thus, they are not reassigned. However, the
+            # remaining Dirichlet and Neumann points must be extracted
+            X_N_reduced = X_unique[~shared_points_dir_neu]
+            Y_N_reduced = Y_unique[~shared_points_dir_neu]
+            
+            # We stack them again as a coordinate set
+            points_neu_out = np.column_stack((X_N_reduced, Y_N_reduced))
+            # This boolean array indicates which of the original Neumann constraints
+            # is still active. This is needed to also extract the relevant values
+            # of the constraints. For divergence-free, this is not needed as they 
+            # are always 0
+            share_points_neumann_before_and_after_reduction = (points_neu_out == points_neu[:, None]).all(-1).any(1)
+            # And we extract the final values
+            self.X_N = self.X_N[share_points_neumann_before_and_after_reduction]
+            self.Y_N = self.Y_N[share_points_neumann_before_and_after_reduction]
+            self.n_x = self.n_x[share_points_neumann_before_and_after_reduction]
+            self.n_y = self.n_y[share_points_neumann_before_and_after_reduction]
+            self.c_N = self.c_N[share_points_neumann_before_and_after_reduction]
+            self.n_N = self.X_N.shape[0]
         
         # Finally, we add the extra RBFs in the constraint points if desired
         if extra_RBF == True:
@@ -612,13 +663,69 @@ class spicy:
                 self.Y_Div = DIV[1]
                 self.Z_Div = DIV[2]
         
+        # # Eliminate duplicates, where we prefer Dirichlet conditions
+        # if self.type == '2D':
+        #     # For this, we first get the points where a constraint is set
+        #     X_constr = np.concatenate((self.X_D, self.X_N, self.X_Div))
+        #     Y_constr = np.concatenate((self.Y_D, self.Y_N, self.Y_Div))
+        #     _, valid_idcs = np.unique(np.column_stack((X_constr, Y_constr)), return_index = True, axis = 0)
+        #     # Extract the unique coordinate sets
+        #     X_unique = X_constr[valid_idcs]
+        #     Y_unique = Y_constr[valid_idcs]
+            
+        #     # Here, we stack three different coordinate sets. These are the unique 
+        #     # constraint points, the Dirichlet, Divergance and the Neumann constraints
+        #     points_dir_div_neu = np.column_stack((X_unique, Y_unique))
+        #     points_dir = np.column_stack((self.X_D, self.Y_D))
+        #     points_neu = np.column_stack((self.X_N, self.Y_N))
+        #     points_div = np.column_stack((self.X_Div, self.Y_Div))
+            
+        #     # this creates a boolean array indicating whether a given point in 
+        #     # (X_unqiue, Y_unique) is contained in the Dirichlet conditions
+        #     shared_points_dir_div_neu = (points_dir_div_neu[:, None] == points_dir).all(-1).any(1)
+        #     # Note: We do not need to extract the Dirichlet conditions, because
+        #     # we always keep them. Thus, they are not reassigned. However, the
+        #     # remaining Dirichlet and Neumann points must be extracted
+        #     X_Div_Neu = X_unique[~shared_points_dir_div_neu]
+        #     Y_Div_Neu = Y_unique[~shared_points_dir_div_neu]
+            
+        #     # We stack them again as a coordinate set
+        #     points_div_neu = np.column_stack((X_Div_Neu, Y_Div_Neu))
+        #     # And extract a boolena array indicating whether the points in that set
+        #     # are also contained in the divergence-free set
+        #     shared_points_div_neu = (points_div_neu[:, None] == points_div).all(-1).any(1)
+        #     # We extract and assign the remaining divergence-free constraints
+        #     self.X_Div = X_Div_Neu[shared_points_div_neu]
+        #     self.Y_Div = Y_Div_Neu[shared_points_div_neu]
+        #     self.n_Div = self.X_Div.shape[0]
+        #     # as well as the remaining Neumann conditions. This the set of points
+        #     # which are not contained in either the Dirichlet or divergence-free points
+        #     X_N_reduced = X_Div_Neu[~shared_points_div_neu]
+        #     Y_N_reduced = Y_Div_Neu[~shared_points_div_neu]
+            
+        #     # We stack them again as a coordinate set
+        #     points_neu_out = np.column_stack((X_N_reduced, Y_N_reduced))
+        #     # This boolean array indicates which of the original Neumann constraints
+        #     # is still active. This is needed to also extract the relevant values
+        #     # of the constraints. For divergence-free, this is not needed as they 
+        #     # are always 0
+        #     share_points_neumann_before_and_after_reduction = (points_neu_out == points_neu[:, None]).all(-1).any(1)
+        #     # And we extract the final values
+        #     self.X_N = self.X_N[share_points_neumann_before_and_after_reduction]
+        #     self.Y_N = self.Y_N[share_points_neumann_before_and_after_reduction]
+        #     self.n_x = self.n_x[share_points_neumann_before_and_after_reduction]
+        #     self.n_y = self.n_y[share_points_neumann_before_and_after_reduction]
+        #     self.c_N_X = self.c_N_X[share_points_neumann_before_and_after_reduction]
+        #     self.c_N_Y = self.c_N_Y[share_points_neumann_before_and_after_reduction]
+        #     self.n_N = self.X_N.shape[0]
+        
         # Finally, we add the extra RBFs in the constraint points if desired
         if extra_RBF == True:
             # Check if we have 2D or a 3D problem.
             if self.type == '2D': # 2D
                 # Assemble all the points where we have constraints
-                X_constr = np.concatenate((self.X_D, self.X_N, self.X_Div))
-                Y_constr = np.concatenate((self.Y_D, self.Y_N, self.Y_Div))
+                X_constr = np.concatenate((self.X_N, self.X_D))
+                Y_constr = np.concatenate((self.Y_N, self.Y_D))
                 # Get the unique values 
                 unique_values = np.unique(np.column_stack((X_constr, Y_constr)), axis = 0)
                 X_unique = unique_values[:,0]
@@ -681,10 +788,12 @@ class spicy:
                     axs[0].scatter(self.X_G, self.Y_G, c=self.u, s=10)
                 elif self.model == 'laminar':
                     axs[0].scatter(self.X_G, self.Y_G, c=np.sqrt(self.u**2 + self.v**2), s=10)
-                
                 # also show the constraints if they are set
-                axs[0].plot(self.X_D, self.Y_D,'ro')
-                axs[0].plot(self.X_N, self.Y_N,'bs')
+                if self.n_D != 0:
+                    axs[0].plot(self.X_D, self.Y_D,'ro')
+                if self.n_N != 0:
+                    
+                    axs[0].plot(self.X_N, self.Y_N,'bs')
                 if self.model == 'laminar':
                     axs[0].plot(self.X_Div, self.Y_Div, 'gd')
  
@@ -724,7 +833,7 @@ class spicy:
     # the regression one inlcudes a potential penalty of a divergence free flow.
 
     # 4.1. Poisson solver
-    def Assembly_Poisson(self, source_terms, n_hb=5):
+    def Assembly_Poisson(self, n_hb=0):
         """
         This function assembly the matrices A, B, C, D from the paper.
         TODO. Currently implemented only for model='scalar'
@@ -762,9 +871,9 @@ class spicy:
         
         """   
         
-        assert type(source_terms) == np.ndarray, 'Source terms must be a 1D numpy array'
+        # assert type(source_terms) == np.ndarray, 'Source terms must be a 1D numpy array'
         assert type(n_hb) == int, 'Number of harmonic basis must be an integer'
-        assert len(source_terms.shape) == 1, 'Source terms must be a 1D numpy array'
+        # assert len(source_terms.shape) == 1, 'Source terms must be a 1D numpy array'
         
         # Assign the number of harmonic basis functions
         self.n_hb = n_hb
@@ -779,6 +888,7 @@ class spicy:
             if self.type == '2D': # 2D           
                 # get the rescaling factor by normalizing the r.h.s. of the source terms
                 # TODO This should maybe also consider the B.C.?
+                source_terms = self.u
                 self.rescale = max(np.max(source_terms), -np.max(-source_terms))      
                 if np.abs(self.rescale) < 1e-10:
                     self.rescale = 1
@@ -790,7 +900,7 @@ class spicy:
                     )) 
                 # Then A and b1 are :
                 self.A = 2*L.T@L
-                self.b_1 = 2*L.T.dot(source_terms)/self.rescale
+                self.b_1 = 2*L.T.dot(source_terms) / self.rescale
     
                 # Check for Dirichlet
                 if self.n_D != 0:
@@ -824,12 +934,19 @@ class spicy:
                     
                 # assemble B and b_2
                 self.B = np.vstack((Matrix_D, Matrix_D_N)).T
-                self.b_2 = np.concatenate((self.c_D, self.c_N))/self.rescale
+                self.b_2 = np.concatenate((self.c_D, self.c_N)) / self.rescale
+                
+                A = self.A
+                B = self.B
+                b1 = self.b_1
+                b2 = self.b_2
+                a = 3
                 
             elif self.type == '3D': # 3D
                 # get the rescaling factor by normalizing the r.h.s. of the source terms
                 # TODO This should maybe also consider the B.C.?
-                self.rescale = max(np.max(source_terms), -np.max(-source_terms))   
+                source_terms = self.u
+                self.rescale = max(np.max(source_terms), -np.max(-source_terms))  
                 if np.abs(self.rescale) < 1e-10:
                     self.rescale = 1
                 
@@ -890,111 +1007,14 @@ class spicy:
                     
                 # assemble B and b_2
                 self.B = np.vstack((Matrix_D, Matrix_D_N)).T
-                self.b_2 = np.concatenate((self.c_D, self.c_N))/self.rescale
+                self.b_2 = np.concatenate((self.c_D, self.c_N)) / self.rescale
         else:
             raise NotImplementedError('Assembly_Poisson only build for the scalar function') 
     
         return
     
-    def Define_Patches(self, bounds, n_circ_x = 5, overlap = 1.2, plot_patches = False):
-        
-        self.bounds = bounds
-        self.n_circ_x = n_circ_x
-        self.overlap = overlap
-        if self.type == '2D':
-            x_min = self.bounds[0]
-            x_max = self.bounds[1]
-            y_min = self.bounds[2]
-            y_max = self.bounds[3]
-        
-            # height and width
-            width = x_max - x_min
-            height = y_max - y_min
-            # calculate the amount of points along y
-            n_circ_y = int((height*self.n_circ_x)//width)
-            # get the coordinates of the spheres at the edges
-            x_low = width/2/self.n_circ_x
-            y_low = height/2/n_circ_y
-            # safety factor to ensure overlapping of the spheres
-            # calculate the radius
-            radius = np.sqrt(x_low**2 + y_low**2)*self.overlap
-            
-            # set up the grid of spheres as a 1d array
-            x_circs = np.linspace(x_low, width-x_low, self.n_circ_x) + x_min
-            y_circs = np.linspace(y_low, height-y_low, n_circ_y) + y_min
-            Y_Circs, X_Circs = np.meshgrid(y_circs, x_circs)
-            X_Circs = X_Circs.ravel()
-            Y_Circs = Y_Circs.ravel()
-            # return the coordinates and the radius
-            
-            self.X_Circs = X_Circs
-            self.Y_Circs = Y_Circs
-            self.radius = radius
-            self.n_circ = self.X_Circs.shape[0]
-        
-            if plot_patches == True:
-                fig, ax = plt.subplots(figsize = (5, 5), dpi = 100)
-                # also show the data points
-                ax.scatter(self.X_G, self.Y_G, c=self.u, s=10)
-                # First plot is the RBF distribution
-                ax.set_title("PUM Patches")
-                for i in range(0, self.n_circ):
-                    circle1 = plt.Circle((X_Circs[i], Y_Circs[i]), radius, 
-                                          fill=False,edgecolor='black',alpha=1, clip_on = False,lw = 1)
-                    ax.add_artist(circle1)  
-                ax.set_xlim(x_min, x_max)
-                ax.set_ylim(y_min, y_max)
-                ax.set_aspect(1)
-                fig.tight_layout()   
-                plt.show()
-                
-            self.X_G_inpatches = []
-            self.Y_G_inpatches = []
-            self.in_circle_G_inpatches = []
-            self.u_inpatches = []
-            self.v_inpatches = []
-            
-            self.X_Div_inpatches = []
-            self.Y_Div_inpatches = []
-            
-            self.X_N_inpatches = []
-            self.Y_N_inpatches = []
-            
-            self.X_D_inpatches = []
-            self.Y_D_inpatches = []
-            
-            self.X_C_inpatches = []
-            self.Y_C_inpatches = []
-            self.c_k_inpatches = []
-            
-            for i, (X_Circ_center, Y_Circ_center) in enumerate(zip(X_Circs, Y_Circs)):
-                in_circle_G = ((self.X_G-X_Circ_center)**2 + (self.Y_G-Y_Circ_center)**2) <= radius**2
-                self.in_circle_G_inpatches.append(in_circle_G)
-                self.X_G_inpatches.append(self.X_G[in_circle_G])
-                self.Y_G_inpatches.append(self.Y_G[in_circle_G])
-                self.u_inpatches.append(self.u[in_circle_G])
-                self.v_inpatches.append(self.v[in_circle_G])
-                
-                in_circle_Div = ((self.X_Div-X_Circ_center)**2 + (self.Y_Div-Y_Circ_center)**2) <= radius**2
-                self.X_Div_inpatches.append(self.X_Div[in_circle_Div])
-                self.Y_Div_inpatches.append(self.Y_Div[in_circle_Div])
-                
-                in_circle_N = ((self.X_N-X_Circ_center)**2 + (self.Y_N-Y_Circ_center)**2) <= radius**2
-                self.X_N_inpatches.append(self.X_N[in_circle_N])
-                self.Y_N_inpatches.append(self.Y_N[in_circle_N])
-                
-                in_circle_D = ((self.X_D-X_Circ_center)**2 + (self.Y_D-Y_Circ_center)**2) <= radius**2
-                self.X_D_inpatches.append(self.X_D[in_circle_D])
-                self.Y_D_inpatches.append(self.Y_D[in_circle_D])
-                
-                in_circle_C = ((self.X_C-X_Circ_center)**2 + (self.Y_C-Y_Circ_center)**2) <= radius**2
-                self.X_C_inpatches.append(self.X_C[in_circle_C])
-                self.Y_C_inpatches.append(self.Y_C[in_circle_C])
-                self.c_k_inpatches.append(self.c_k[in_circle_C])
-            return
-    
     # 4.2. Regression
-    def Assembly_Regression(self, n_hb=5, alpha_div=None, pum=False):
+    def Assembly_Regression(self, n_hb=0, alpha_div=None, pum=False):
         """
         This function assembly the matrices A, B, C, D from the paper.
         
@@ -1046,9 +1066,68 @@ class spicy:
         elif self.type == '3D':
             self.n_b = self.X_C.shape[0] + n_hb**6
         
+        # Scalar and laminar share some computations. However, when we want to 
+        # delete matrices to save memory, this is not useful/advisable, so the 
+        # scalar case is treated separately
+        
         # Scalar model
         if self.model == 'scalar':
-            raise NotImplementedError('Scalar currently not implemented')
+            if self.type == '2D': # 2D
+                # define the rescaling factor which is done based on the maximum
+                # absolute velocity that is available in u and v 
+                self.rescale = self.u[np.argmax(np.abs(self.u))]
+                
+                # Check for Dirichlet
+                if self.n_D !=0: # We have Dirichlet conditions
+                    # Compute Phi on X_D (16)
+                    Matrix_D = np.hstack((
+                        Phi_H_2D(self.X_D, self.Y_D, self.n_hb),
+                        Phi_RBF_2D(self.X_D, self.Y_D, self.X_C, self.Y_C, self.c_k, self.basis)
+                        ))
+                else: # No Dirichlet conditions
+                    # initialize the empty array
+                    Matrix_D = np.empty((0, self.n_b))
+                
+                # Check for Neumann
+                if self.n_N != 0: # We have Neumann conditions
+                    # Compute Phi_x on X_N
+                    Matrix_Phi_2D_X_N_der_x = np.hstack((
+                        Phi_H_2D_x(self.X_N, self.Y_N, self.n_hb),
+                        Phi_RBF_2D_x(self.X_N, self.Y_N,
+                                      self.X_C, self.Y_C,
+                                      self.c_k, self.basis)
+                        ))
+                    # Compute Phi_y on X_N
+                    Matrix_Phi_2D_X_N_der_y = np.hstack((
+                        Phi_H_2D_y(self.X_N, self.Y_N, self.n_hb),
+                        Phi_RBF_2D_y(self.X_N, self.Y_N,
+                                      self.X_C, self.Y_C,
+                                      self.c_k, self.basis)
+                        ))
+                    # Compute Phi_n on X_N (equation (18))
+                    Matrix_D_N = Matrix_Phi_2D_X_N_der_x*self.n_x[:, np.newaxis] +\
+                                 Matrix_Phi_2D_X_N_der_y*self.n_y[:, np.newaxis]
+                else: # No Neumann conditions
+                    # initialize the empty array
+                    Matrix_D_N = np.empty((0,self.n_b))
+                
+                # We can now assemble the matrix independent of what combinations
+                # of Dirichlet and Neumann we have
+                self.B = np.vstack((Matrix_D, Matrix_D_N)).T
+                # We do the same for b_2, as this can also be done for every case
+                self.b_2 = np.concatenate((self.c_D, self.c_N)) / self.rescale
+                
+                # We compute Phi on all node points X
+                Matrix_Phi_2D_X = np.hstack((
+                    Phi_H_2D(self.X_G, self.Y_G, self.n_hb),
+                    Phi_RBF_2D(self.X_G, self.Y_G, self.X_C, self.Y_C, self.c_k, self.basis)
+                    ))
+                # block structure of A as in equation(10)
+                PhiT_dot_Phi = Matrix_Phi_2D_X.T.dot(Matrix_Phi_2D_X)
+                self.A = 2*Matrix_Phi_2D_X.T.dot(Matrix_Phi_2D_X)
+                # compute b_1
+                self.b_1 = 2*Matrix_Phi_2D_X.T.dot(self.u) / self.rescale
+                
         # Laminar model
         elif self.model == 'laminar':  
             # we need to check whether we are 2D or 3D laminar as this changes the assignment
@@ -1178,7 +1257,11 @@ class spicy:
                         self.A[self.n_b*0:self.n_b*1,self.n_b*1:self.n_b*2] += 2*alpha_div*PhiXT_dot_PhiY
                         # Lower off-diagonal elements
                         self.A[self.n_b*1:self.n_b*2,self.n_b*0:self.n_b*1] += 2*alpha_div*PhiXT_dot_PhiY.T 
-                       
+                    A = self.A
+                    B = self.B
+                    b1 = self.b_1
+                    b2 = self.b_2
+                    a = 3
                           
                 elif self.type == '3D': # 3D
                     # define the rescaling factor which is done based on the maximum
@@ -1222,7 +1305,7 @@ class spicy:
                     # we have them or not. If we have them, the matrices are computed
                     # If not, we initialize an empty array of appropriate size. This
                     # allows us to stack them together universally without checking all
-                    # four possibilities of having or not having the two
+                    # four possibilities of having or not having the twoo
                     
                     # Check for Dirichlet
                     if self.n_D !=0: # We have Dirichlet conditions
@@ -1357,6 +1440,18 @@ class spicy:
                         self.A[self.n_b*1:self.n_b*2,self.n_b*0:self.n_b*1] += 2*alpha_div*PhiXT_dot_PhiY.T
                         self.A[self.n_b*2:self.n_b*3,self.n_b*0:self.n_b*1] += 2*alpha_div*PhiXT_dot_PhiZ.T
                         self.A[self.n_b*2:self.n_b*3,self.n_b*1:self.n_b*2] += 2*alpha_div*PhiYT_dot_PhiZ.T
+                    
+                    # A = self.A
+                    # B = self.B
+                    # b1 = self.b_1
+                    # b2 = self.b_2
+                    
+                    # print(A.mean(), A.max(), A.min())
+                    # print(B.mean(), B.max(), B.min())
+                    # print(b1.mean(), b1.max(), b1.min())
+                    # print(b2.mean(), b2.max(), b2.min())
+                    # a = 3
+                    
             elif self.method == 'pum_local':
                 self.A = []
                 self.B = []
@@ -1455,149 +1550,261 @@ class spicy:
         else:
             raise ValueError('No regression could be performed, check that the model is correctly set')
         return
-
-
+    
+    # def Solve_Pietro(self, rcond = 1e-12):
+    #     # A=self.A; B=self.B ; b1=self.b_1; b2=self.b_2
+    #     # print(A.mean(), A.max(), A.min())
+    #     # print(B.mean(), B.max(), B.min())
+    #     # print(b1.mean(), b1.max(), b1.min())
+    #     # print(b2.mean(), b2.max(), b2.min())
+    #     rhoA=np.linalg.norm(A,np.inf)
+    #     alfa=rcond*rhoA
+    #     A=A+alfa*np.eye(np.shape(A)[0])
+    #     U1=np.linalg.cholesky(A) 
+    #     U1=U1.T
+    #     del A
+    #     y=linalg.solve_triangular(U1.T,B,lower=True)                    
+    #     N=linalg.solve_triangular(U1,y)
+    #     del y
+    #     N=N.T
+    #     M=N.dot(B)
+    #     b2star=N.dot(b1)-b2
+    #     del N
+    #     rhoM=np.linalg.norm(M,np.inf)
+    #     beta=rcond*rhoM
+    #     U2=np.linalg.cholesky(M+beta*np.eye(np.shape(M)[0]))
+    #     U2=U2.T
+    #     y=linalg.solve_triangular(U2.T,b2star,lower=True)
+    #     lam=linalg.solve_triangular(U2,y)
+    #     del U2    
+    #     y=linalg.solve_triangular(U1.T,b1-B.dot(lam),lower=True)
+    #     self.w=linalg.solve_triangular(U1,y) * self.rescale
+        
+    
     # 5 Solver using the Shur complement
     def Solve(self, K_cond=1e12):
-        """
-        This function solves the constrained quadratic problem A, B, b_1, b_2.
-        The method is universal for 2D/3D problems as well as laminar/poisson problems
-    
-        The input parameters are the class itself and the desired condition 
-        number of A which is fixed based on its largest and smallest eigenvalue
-        
-        The function assigns the weights 'w' and the Lagrange multipliers
-        Lambda to the class. The weights are computed for the min/max scaled problem,
-        i.e. the right hand-side of the linear system is normalized. The assigned
-        weights are rescaled by self.rescale to get the real, physical quantities
-        
-        TODO Suggestion: We do a check whether B is empty and if it is, just 
-        do the solution based on the inverted A. This would allow a regression
-        without any constraints
-        
-        ------------------------------------------------------------------------
-        Parameters
-        ------------------------------------------------------------------------
-        :param K_cond: float
-          This is the regularization parameter. It is fixing the condition number
-          The estimation is based such that the regularize matrix has the condition
-          number k_cond. For this, we compute the max and the min eigenvalue.
-        """   
-        if self.method == 'global':
-            # Assign variables for debugging purposes
-            A=self.A; B=self.B ; b_1=self.b_1; b_2=self.b_2
+        # Two options: 
+        # 1.: We have constraints, then B and b_2 are not empty and we go for Schur complements
+        # 2.: We do not have constraints, then we only need to solve A*w = b_1
+        if (self.B.size == 0) and (self.b_2.size == 0):
+            print('Solving without constriaints')
             
             # Step 1: Regularize the matrix A
-            lambda_M = eigsh(A, 1, return_eigenvectors = False) # Largest eigenvalue
+            lambda_A = eigsh(self.A, 1, return_eigenvectors=False) # Largest eigenvalue
+            alpha = lambda_A / K_cond
+            self.A = self.A + alpha*np.eye(np.shape(self.A)[0])
+            print('Matrix A regularized')
+            
+            # Step 2: Cholesky Decomposition of A 
+            L_A, low = linalg.cho_factor(self.A, overwrite_a = True, check_finite = False, lower = True)
+            
+            # Step 3: Solve for w
+            self.w = linalg.cho_solve((L_A, low), self.b_1, check_finite = False) * self.rescale
+            
+            
+        elif (self.B.size != 0) and (self.b_2.size != 0):
+            print('Solving with constriaints')
+            
+            # Step 1: Regularize the matrix A
+            lambda_M = eigsh(self.A, 1, return_eigenvectors=False) # Largest eigenvalue
             alpha = lambda_M / K_cond
-     
-            A= A + alpha*np.eye(np.shape(A)[0])
-            # print('Conditioning number of A after regularization: ' + str(np.linalg.cond(A)))
+            self.A = self.A + alpha*np.eye(np.shape(self.A)[0])
             print('Matrix A regularized')
             
             # Step 2: Cholesky Decomposition of A    
-            L_A, low = linalg.cho_factor(A, overwrite_a = True, check_finite = False, lower = True)
+            L_A, low = linalg.cho_factor(self.A, overwrite_a=True, check_finite=False, lower=True)
             
             # Step 3: Solve for N
-            N = linalg.cho_solve((L_A,low),B,check_finite=False)
+            N = linalg.cho_solve((L_A,low), self.B, check_finite=False)
             
             # Step 4: prepare M 
-            M = N.T@B
+            M = N.T@self.B
             
             # Step 5 + 6: Regularize M if needed, then compute chol factor
             try: 
-             L_M, low = linalg.cho_factor(M, overwrite_a = True, check_finite = False, lower = True)
-             print('Chol factor of M WITHOUT regularization')             
+                # try without regularization
+                L_M, low = linalg.cho_factor(M, overwrite_a=True, check_finite=False, lower=True)
+                print('Chol factor of M WITHOUT regularization')             
             except:
-             lambda_M = eigsh(M, 1, return_eigenvectors = False) # Largest eigenvalue
-             alpha = lambda_M/K_cond
-             M = M + alpha*np.eye(np.shape(M)[0])
-             L_M, low = linalg.cho_factor(M, overwrite_a = True, check_finite = False, lower = True)
-             print('Chol factor of M WITH regularization')             
+                # if it does not work, regularize M the same way as for A
+                lambda_M = eigsh(M, 1, return_eigenvectors=False) # Largest eigenvalue
+                alpha = lambda_M / K_cond
+                M = M + alpha*np.eye(np.shape(M)[0])
+                L_M, low = linalg.cho_factor(M, overwrite_a = True, check_finite = False, lower = True)
+                print('Chol factor of M WITH regularization')             
            
             # Step 7: Solve the system for lambda    
-            b2star = N.T.dot(b_1) - b_2
-            self.lam = linalg.cho_solve((L_M, low), b2star, check_finite = False) * self.rescale
+            b2star = N.T.dot(self.b_1) - self.b_2
+            self.lam = linalg.cho_solve((L_M, low), b2star, check_finite = False)
             print('Lambdas computed')
         
             # Step 8: Solve for w.
-            b1_star = b_1 - B.dot(self.lam)
-            self.w = linalg.cho_solve((L_A, low), b1_star, check_finite = False) * self.rescale
+            b1_star = self.b_1 - self.B.dot(self.lam)
+            self.w = linalg.cho_solve((L_A, low), b1_star, check_finite=False) * self.rescale
             print('w computed')
+        else:
+            raise ValueError('b_1 or B is empty while the other is not, check your constraints!')
+    
+        # You could estimate the error in the solutions:
+        # err_w=np.linalg.norm(A.dot(self.w)+B.dot(self.lam)-b_1)    
+        # err_lam=np.linalg.norm(B.T.dot(self.w)-b_2) 
         
-            # You could estimate the error in the solutions:
-            # err_w=np.linalg.norm(A.dot(self.w)+B.dot(self.lam)-b_1)    
-            # err_lam=np.linalg.norm(B.T.dot(self.w)-b_2)    
-        elif self.method == 'pum_local':
-            self.w = []
-            self.lam = []
-            for i in range(self.n_circ):
-                A=self.A[i]; B=self.B[i] ; b_1=self.b_1[i]; b_2=self.b_2[i]
-                if B.size == 0:
-                    # lambda_m = eigsh(A, 1, sigma = 0.0, return_eigenvectors = False) # smallest eigenvalue
-                    # lambda_M = eigsh(A, 1, return_eigenvectors = False) # Largest eigenvalue
-                    # alpha = (lambda_M-K_cond*lambda_m) / (K_cond-1)
-                    alpha = 1e-12*np.linalg.norm(A, np.inf)
-                    A_reg = A + alpha*np.eye(np.shape(A)[0])
-                    L_A, low = linalg.cho_factor(A_reg, overwrite_a = True, check_finite = False, lower = True)
-                    self.w.append(linalg.cho_solve((L_A, low), b_1, check_finite = False) * self.rescale[i])
-                    self.lam.append(None)
-                else:
+    # def Solve_Old(self, K_cond=1e12):
+    #     """
+    #     This function solves the constrained quadratic problem A, B, b_1, b_2.
+    #     The method is universal for 2D/3D problems as well as laminar/poisson problems
+    
+    #     The input parameters are the class itself and the desired condition 
+    #     number of A which is fixed based on its largest and smallest eigenvalue
+        
+    #     The function assigns the weights 'w' and the Lagrange multipliers
+    #     Lambda to the class. The weights are computed for the min/max scaled problem,
+    #     i.e. the right hand-side of the linear system is normalized. The assigned
+    #     weights are rescaled by self.rescale to get the real, physical quantities
+        
+    #     TODO Suggestion: We do a check whether B is empty and if it is, just 
+    #     do the solution based on the inverted A. This would allow a regression
+    #     without any constraints
+        
+    #     ------------------------------------------------------------------------
+    #     Parameters
+    #     ------------------------------------------------------------------------
+    #     :param K_cond: float
+    #       This is the regularization parameter. It is fixing the condition number
+    #       The estimation is based such that the regularize matrix has the condition
+    #       number k_cond. For this, we compute the max and the min eigenvalue.
+    #     """   
+    #     if self.method == 'global':
+    #         # Assign variables for debugging purposes
+    #         A=self.A; B=self.B ; b_1=self.b_1; b_2=self.b_2
+            
+    #         # Step 1: Regularize the matrix A
+    #         try:
+    #             lambda_m = eigsh(self.A, 1, sigma = 0.0, return_eigenvectors = False) # smallest eigenvalue
+    #             lambda_M = eigsh(self.A, 1, return_eigenvectors = False) # Largest eigenvalue
+    #             alpha = (lambda_M-K_cond*lambda_m) / (K_cond-1)
+    #         except:
+    #             lambda_M = eigsh(A, 1, return_eigenvectors = False) # Largest eigenvalue
+    #             alpha = (lambda_M) / (K_cond-1)
+    #             print('Warning, lambda_m could not be computed in A')   
+             
+    #         # print('Conditioning number of A before regularization: ' + str(np.linalg.cond(A)))
+    #         alpha = 1e-12*np.linalg.norm(A,np.inf)
+    #         A = A + alpha*np.eye(np.shape(A)[0])
+    #         # print('Conditioning number of A after regularization: ' + str(np.linalg.cond(A)))
+    #         print('Matrix A regularized')
+            
+    #         # Step 2: Cholesky Decomposition of A    
+    #         L_A, low = linalg.cho_factor(A, overwrite_a = True, check_finite = False, lower = True)
+            
+    #         # Step 3: Solve for N
+    #         N = linalg.cho_solve((L_A,low),B,check_finite=False)
+            
+    #         # Step 4: prepare M 
+    #         M = N.T@B
+            
+    #         # Step 5: Regularize M
+    #         try:
+    #             lambda_m = eigsh(M, 1, sigma = 0.0, return_eigenvectors = False) # smallest eigenvalue
+    #             lambda_M = eigsh(M, 1, return_eigenvectors = False) # Largest eigenvalue
+    #             alpha = (lambda_M-K_cond*lambda_m) / (K_cond-1)
+    #         except:
+    #             print('Warning, lambda_m could not be computed in M')
+    #             lambda_M = eigsh(M, 1, return_eigenvectors = False) # Largest eigenvalue
+    #             alpha = (lambda_M) / (K_cond-1)
+    #         alpha = 1e-12*np.linalg.norm(M,np.inf)
+    #         # print('Conditioning number of M before regularization: ' + str(np.linalg.cond(M)))
+    #         M = M + alpha*np.eye(np.shape(M)[0])
+    #         # print('Conditioning number of M after regularization: ' + str(np.linalg.cond(M)))
+    #         print('Matrix M computed and regularized')
+            
+    #         # Step 6: get the chol factor of M    
+    #         L_M, low = linalg.cho_factor(M, overwrite_a = True, check_finite = False, lower = True)
+        
+    #         # Step 7: Solve the system for lambda    
+    #         b2star = N.T.dot(b_1) - b_2
+    #         self.lam = linalg.cho_solve((L_M, low), b2star, check_finite = False)# * self.rescale
+    #         print('Lambdas computed')
+        
+    #         # Step 8: Solve for w.
+    #         b1_star = b_1 - B.dot(self.lam)
+    #         self.w = linalg.cho_solve((L_A, low), b1_star, check_finite = False) * self.rescale
+    #         print('w computed')
+        
+    #         # You could estimate the error in the solutions:
+    #         # err_w=np.linalg.norm(A.dot(self.w)+B.dot(self.lam)-b_1)    
+    #         # err_lam=np.linalg.norm(B.T.dot(self.w)-b_2)    
+    
+        # elif self.method == 'pum_local':
+        #     self.w = []
+        #     self.lam = []
+        #     for i in range(self.n_circ):
+        #         A=self.A[i]; B=self.B[i] ; b_1=self.b_1[i]; b_2=self.b_2[i]
+        #         if B.size == 0:
+        #             # lambda_m = eigsh(A, 1, sigma = 0.0, return_eigenvectors = False) # smallest eigenvalue
+        #             # lambda_M = eigsh(A, 1, return_eigenvectors = False) # Largest eigenvalue
+        #             # alpha = (lambda_M-K_cond*lambda_m) / (K_cond-1)
+        #             alpha = 1e-12*np.linalg.norm(A, np.inf)
+        #             A_reg = A + alpha*np.eye(np.shape(A)[0])
+        #             L_A, low = linalg.cho_factor(A_reg, overwrite_a = True, check_finite = False, lower = True)
+        #             self.w.append(linalg.cho_solve((L_A, low), b_1, check_finite = False) * self.rescale[i])
+        #             self.lam.append(None)
+        #         else:
                     
-                    # Step 1: Regularize the matrix A
-                    try:
-                        lambda_m = eigsh(A, 1, sigma = 0.0, return_eigenvectors = False) # smallest eigenvalue
-                        lambda_M = eigsh(A, 1, return_eigenvectors = False) # Largest eigenvalue
-                        alpha = (lambda_M-K_cond*lambda_m) / (K_cond-1)
-                    except:
-                        lambda_M = eigsh(A, 1, return_eigenvectors = False) # Largest eigenvalue
-                        alpha = (lambda_M) / (K_cond-1)
-                        print('Warning, lambda_m could not be computed in A')   
+        #             # Step 1: Regularize the matrix A
+        #             try:
+        #                 lambda_m = eigsh(A, 1, sigma = 0.0, return_eigenvectors = False) # smallest eigenvalue
+        #                 lambda_M = eigsh(A, 1, return_eigenvectors = False) # Largest eigenvalue
+        #                 alpha = (lambda_M-K_cond*lambda_m) / (K_cond-1)
+        #             except:
+        #                 lambda_M = eigsh(A, 1, return_eigenvectors = False) # Largest eigenvalue
+        #                 alpha = (lambda_M) / (K_cond-1)
+        #                 print('Warning, lambda_m could not be computed in A')   
                     
-                    alpha = 1e-12*np.linalg.norm(A, np.inf) 
-                    # print('Conditioning number of A before regularization: ' + str(np.linalg.cond(A)))
-                    A = A + alpha*np.eye(np.shape(A)[0])
-                    # print('Conditioning number of A after regularization: ' + str(np.linalg.cond(A)))
-                    # print('Matrix A regularized')
+        #             alpha = 1e-12*np.linalg.norm(A, np.inf) 
+        #             # print('Conditioning number of A before regularization: ' + str(np.linalg.cond(A)))
+        #             A = A + alpha*np.eye(np.shape(A)[0])
+        #             # print('Conditioning number of A after regularization: ' + str(np.linalg.cond(A)))
+        #             # print('Matrix A regularized')
                     
-                    # Step 2: Cholesky Decomposition of A    
-                    L_A, low = linalg.cho_factor(A, overwrite_a = True, check_finite = False, lower = True)
+        #             # Step 2: Cholesky Decomposition of A    
+        #             L_A, low = linalg.cho_factor(A, overwrite_a = True, check_finite = False, lower = True)
                     
-                    # Step 3: Solve for N
-                    N = linalg.cho_solve((L_A,low),B,check_finite=False)
+        #             # Step 3: Solve for N
+        #             N = linalg.cho_solve((L_A,low),B,check_finite=False)
                     
-                    # Step 4: prepare M 
-                    M = N.T@B
+        #             # Step 4: prepare M 
+        #             M = N.T@B
                     
-                    # Step 5: Regularize M
-                    # try:
-                    #     lambda_m = eigsh(M, 1, sigma = 0.0, return_eigenvectors = False) # smallest eigenvalue
-                    #     lambda_M = eigsh(M, 1, return_eigenvectors = False) # Largest eigenvalue
-                    #     alpha = (lambda_M-K_cond*lambda_m) / (K_cond-1)
-                    # except:
-                    #     print('Warning, lambda_m could not be computed in M')
-                    #     lambda_M = eigsh(M, 1, return_eigenvectors = False) # Largest eigenvalue
-                    #     alpha = (lambda_M) / (K_cond-1)
-                    alpha = 1e-12*np.linalg.norm(M,np.inf)
-                    # print('Conditioning number of M before regularization: ' + str(np.linalg.cond(M)))
-                    M = M + alpha*np.eye(np.shape(M)[0])
-                    # print('Conditioning number of M after regularization: ' + str(np.linalg.cond(M)))
-                    # print('Matrix M computed and regularized')
+        #             # Step 5: Regularize M
+        #             # try:
+        #             #     lambda_m = eigsh(M, 1, sigma = 0.0, return_eigenvectors = False) # smallest eigenvalue
+        #             #     lambda_M = eigsh(M, 1, return_eigenvectors = False) # Largest eigenvalue
+        #             #     alpha = (lambda_M-K_cond*lambda_m) / (K_cond-1)
+        #             # except:
+        #             #     print('Warning, lambda_m could not be computed in M')
+        #             #     lambda_M = eigsh(M, 1, return_eigenvectors = False) # Largest eigenvalue
+        #             #     alpha = (lambda_M) / (K_cond-1)
+        #             alpha = 1e-12*np.linalg.norm(M,np.inf)
+        #             # print('Conditioning number of M before regularization: ' + str(np.linalg.cond(M)))
+        #             M = M + alpha*np.eye(np.shape(M)[0])
+        #             # print('Conditioning number of M after regularization: ' + str(np.linalg.cond(M)))
+        #             # print('Matrix M computed and regularized')
                     
-                    # Step 6: get the chol factor of M    
-                    L_M, low = linalg.cho_factor(M, overwrite_a = True, check_finite = False, lower = True)
+        #             # Step 6: get the chol factor of M    
+        #             L_M, low = linalg.cho_factor(M, overwrite_a = True, check_finite = False, lower = True)
                 
-                    # Step 7: Solve the system for lambda    
-                    b2star = N.T.dot(b_1) - b_2
-                    self.lam.append(linalg.cho_solve((L_M, low), b2star, check_finite = False) * self.rescale[i])
-                    # print('Lambdas computed')
+        #             # Step 7: Solve the system for lambda    
+        #             b2star = N.T.dot(b_1) - b_2
+        #             self.lam.append(linalg.cho_solve((L_M, low), b2star, check_finite = False) * self.rescale[i])
+        #             # print('Lambdas computed')
                 
-                    # Step 8: Solve for w.
-                    b1_star = b_1 - B.dot(self.lam[i])
+        #             # Step 8: Solve for w.
+        #             b1_star = b_1 - B.dot(self.lam[i])
                     
-                    self.w.append(linalg.cho_solve((L_A, low), b1_star, check_finite = False) * self.rescale[i])
-                w = self.w[i]
-                a = 3
+        #             self.w.append(linalg.cho_solve((L_A, low), b1_star, check_finite = False) * self.rescale[i])
+        #         w = self.w[i]
+        #         a = 3
         return 
 
     # 6. Evaluate solution on arbitrary grid
@@ -1986,6 +2193,103 @@ class spicy:
             raise ValueError('Length of Grid is invalid for Type ' + self.type)
             
         return P_Neu
+    
+    def Define_Patches(self, bounds, n_circ_x = 5, overlap = 1.2, plot_patches = False):
+        
+        self.bounds = bounds
+        self.n_circ_x = n_circ_x
+        self.overlap = overlap
+        if self.type == '2D':
+            x_min = self.bounds[0]
+            x_max = self.bounds[1]
+            y_min = self.bounds[2]
+            y_max = self.bounds[3]
+        
+            # height and width
+            width = x_max - x_min
+            height = y_max - y_min
+            # calculate the amount of points along y
+            n_circ_y = int((height*self.n_circ_x)//width)
+            # get the coordinates of the spheres at the edges
+            x_low = width/2/self.n_circ_x
+            y_low = height/2/n_circ_y
+            # safety factor to ensure overlapping of the spheres
+            # calculate the radius
+            radius = np.sqrt(x_low**2 + y_low**2)*self.overlap
+            
+            # set up the grid of spheres as a 1d array
+            x_circs = np.linspace(x_low, width-x_low, self.n_circ_x) + x_min
+            y_circs = np.linspace(y_low, height-y_low, n_circ_y) + y_min
+            Y_Circs, X_Circs = np.meshgrid(y_circs, x_circs)
+            X_Circs = X_Circs.ravel()
+            Y_Circs = Y_Circs.ravel()
+            # return the coordinates and the radius
+            
+            self.X_Circs = X_Circs
+            self.Y_Circs = Y_Circs
+            self.radius = radius
+            self.n_circ = self.X_Circs.shape[0]
+        
+            if plot_patches == True:
+                fig, ax = plt.subplots(figsize = (5, 5), dpi = 100)
+                # also show the data points
+                ax.scatter(self.X_G, self.Y_G, c=self.u, s=10)
+                # First plot is the RBF distribution
+                ax.set_title("PUM Patches")
+                for i in range(0, self.n_circ):
+                    circle1 = plt.Circle((X_Circs[i], Y_Circs[i]), radius, 
+                                          fill=False,edgecolor='black',alpha=1, clip_on = False,lw = 1)
+                    ax.add_artist(circle1)  
+                ax.set_xlim(x_min, x_max)
+                ax.set_ylim(y_min, y_max)
+                ax.set_aspect(1)
+                fig.tight_layout()   
+                plt.show()
+                
+            self.X_G_inpatches = []
+            self.Y_G_inpatches = []
+            self.in_circle_G_inpatches = []
+            self.u_inpatches = []
+            self.v_inpatches = []
+            
+            self.X_Div_inpatches = []
+            self.Y_Div_inpatches = []
+            
+            self.X_N_inpatches = []
+            self.Y_N_inpatches = []
+            
+            self.X_D_inpatches = []
+            self.Y_D_inpatches = []
+            
+            self.X_C_inpatches = []
+            self.Y_C_inpatches = []
+            self.c_k_inpatches = []
+            
+            for i, (X_Circ_center, Y_Circ_center) in enumerate(zip(X_Circs, Y_Circs)):
+                in_circle_G = ((self.X_G-X_Circ_center)**2 + (self.Y_G-Y_Circ_center)**2) <= radius**2
+                self.in_circle_G_inpatches.append(in_circle_G)
+                self.X_G_inpatches.append(self.X_G[in_circle_G])
+                self.Y_G_inpatches.append(self.Y_G[in_circle_G])
+                self.u_inpatches.append(self.u[in_circle_G])
+                self.v_inpatches.append(self.v[in_circle_G])
+                
+                in_circle_Div = ((self.X_Div-X_Circ_center)**2 + (self.Y_Div-Y_Circ_center)**2) <= radius**2
+                self.X_Div_inpatches.append(self.X_Div[in_circle_Div])
+                self.Y_Div_inpatches.append(self.Y_Div[in_circle_Div])
+                
+                in_circle_N = ((self.X_N-X_Circ_center)**2 + (self.Y_N-Y_Circ_center)**2) <= radius**2
+                self.X_N_inpatches.append(self.X_N[in_circle_N])
+                self.Y_N_inpatches.append(self.Y_N[in_circle_N])
+                
+                in_circle_D = ((self.X_D-X_Circ_center)**2 + (self.Y_D-Y_Circ_center)**2) <= radius**2
+                self.X_D_inpatches.append(self.X_D[in_circle_D])
+                self.Y_D_inpatches.append(self.Y_D[in_circle_D])
+                
+                in_circle_C = ((self.X_C-X_Circ_center)**2 + (self.Y_C-Y_Circ_center)**2) <= radius**2
+                self.X_C_inpatches.append(self.X_C[in_circle_C])
+                self.Y_C_inpatches.append(self.Y_C[in_circle_C])
+                self.c_k_inpatches.append(self.c_k[in_circle_C])
+            return
 
 
 # =============================================================================
@@ -2634,7 +2938,7 @@ def add_constraint_collocations_2D(X_constr, Y_constr, X_C, Y_C, r_mM, eps_l, ba
         # for plotting purposes, we store also the diameters
         d_k = c_ks * np.sqrt(1 - 0.5**0.2)
     
-    return c_ks*2, d_k
+    return c_ks, d_k
 
 def add_constraint_collocations_3D(X_constr, Y_constr, Z_constr, X_C, Y_C, Z_C, r_mM, eps_l, basis):
     """
