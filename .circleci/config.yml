@@ -1,0 +1,251 @@
+# This is a CircleCI configuration that you can add to your Github repository,
+# and connect to CircleCI to build a PDF paper! If you don't
+# define any custom variables, your paper will be generated and available
+# as an artifact. 
+
+# Variables you can customize
+# OPENBASES_CONTAINER: is the container that will be used, see default section
+# OPENBASES_PYTHON: is the openbases/openbases python container for testing
+# OPENBASES_PAPER_ARGS: are any special arguments to pass to the openbases-pdf container
+# OPENBASES_VALIDATE_ARGS: additional arguments to pass to openbases (ob-validate)
+
+# The following variables are optional and will give you
+# additional deployments / functionality.
+
+# GITHUB_USER
+# GITHUB_EMAIL if defined, you can deploy your paper back to Github pages.
+
+# PAPER_VERSION
+# will be first 10 characters of commit, or you can define for a custom
+
+################################################################################
+# Functions
+################################################################################
+
+# Defaults
+defaults: &defaults
+  docker:
+    - image: docker:18.01.0-ce-git
+  working_directory: /tmp/src
+
+# Installation
+install: &install
+    name: Install parallel gzip, gettext, python3, openbases, and jq
+    command: |
+        apk add --no-cache pigz python3 gettext jq
+
+# Environment
+sourceenv: &sourceenv
+    name: Source environment variables from the BASH_ENV
+    command: source $BASH_ENV 
+
+pdfenv: &pdfenv
+    name: Define container and open bases names
+    command: |
+        # If not set, define OPENBASES_CONTAINER
+        if [ ! -n "${OPENBASES_CONTAINER:-}" ]; then
+            OPENBASES_CONTAINER="openbases/openbases-pdf"
+        fi
+        echo "Open Bases builder is ${OPENBASES_CONTAINER}"
+        if [ ! -n "${OPENBASES_PYTHON:-}" ]; then
+            OPENBASES_PYTHON="openbases/openbases"
+        fi
+        echo "Open Bases python container is ${OPENBASES_PYTHON}"
+        # If not set, define PAPER_VERSION (akin to commit version)
+        if [ ! -n "${PAPER_VERSION:-}" ]; then
+            PAPER_VERSION=$(echo "${CIRCLE_SHA1}" | cut -c1-10)
+        fi
+        # export to bash environment
+        echo "export OPENBASES_CONTAINER=${OPENBASES_CONTAINER}" >> ${BASH_ENV}
+        echo "export OPENBASES_PYTHON=${OPENBASES_PYTHON}" >> ${BASH_ENV}
+        echo "export PAPER_VERSION=${PAPER_VERSION}" >> ${BASH_ENV}
+        cat ${BASH_ENV}
+
+githubsetup: &githubsetup
+    name: Prepare Github account credentials
+    command: |
+        # Only proceed if we minimally have a Github email
+        if [[ -n "${GITHUB_EMAIL:-}" ]];
+            then
+                echo "Preparing Github account credentials"
+                git config --global user.email $GITHUB_EMAIL
+                # If username is defined, use it (otherwuse use circle project)
+                if [[ -n "${GITHUB_USER:-}" ]];
+                    then
+                    git config --global user.name $GITHUB_USER
+                else
+                    git config --global user.name $CIRCLE_PROJECT_USERNAME
+                fi
+        fi
+
+
+test: &test
+    name: use openbases/openbases python docker container to test the paper
+    command: |
+        source ${BASH_ENV}
+        cd /tmp/src
+        echo "1. Starting OpenBases Python Container!"
+        echo "docker run --name openbases --entrypoint bash -dt ${OPENBASES_PYTHON}"
+        docker run --name openbases --entrypoint bash -dt "${OPENBASES_PYTHON}"
+        echo "2. Copying paper stuffs for Open Bases PDF..."
+        echo "docker cp ./paper/. openbases:/data/"
+        docker cp ./paper/. openbases:/data/
+        echo "3. Validating paper and bibliography"
+        echo "docker exec openbases ob-validate paper --infile /data/paper.md"
+        docker exec openbases ob-validate paper --infile /data/paper.md "${OPENBASES_VALIDATE_ARGS}"
+        echo "4. Stopping openbases validator..."
+        docker stop openbases
+
+pdf: &pdf
+    name: use openbases/openbases-pdf docker container to generate pdf
+    command: |
+        source ${BASH_ENV}
+        cd /tmp/src
+        echo "1. Starting OpenBases PDF Builder bot!"
+        echo "docker run --name openbases-pdf  --entrypoint bash -dt ${OPENBASES_CONTAINER}"
+        docker run --name openbases-pdf  --entrypoint bash -dt "${OPENBASES_CONTAINER}"
+        echo "2. Getting JOSS logo..."
+        wget $(docker run openbases/openbases icons --regexp joss) -O ./paper/logo.png
+        echo "3. Copying paper stuffs for Open Bases PDF..."
+        echo "docker cp ./paper/. openbases-pdf:/data/"
+        docker cp ./paper/. openbases-pdf:/data/
+        echo "4. Go Robot Go, generate the PDF!"
+        echo "docker exec openbases-pdf /bin/bash /code/entrypoint.sh pdf"
+        docker exec openbases-pdf /bin/bash /code/entrypoint.sh pdf /data/paper.md "${OPENBASES_PAPER_ARGS}"
+        echo "5. Obtaining finished paper.pdf"
+        mkdir -p /tmp/paper
+        echo "docker cp openbases-pdf:/data/. /tmp/paper"
+        docker cp openbases-pdf:/data/. /tmp/paper/
+        echo "6. Creating archive."
+        echo "tar czf paper.tar.gz /tmp/paper"
+        tar czf paper.tar.gz /tmp/paper
+        mv paper.tar.gz /tmp/paper
+        echo "7. Stopping openbases-pdf..."
+        docker stop openbases-pdf
+        echo "Contents of /tmp"
+        ls /tmp
+        echo "Contents of /tmp/paper"
+        ls /tmp/paper
+
+################################################################################
+# Jobs
+################################################################################
+
+
+version: 2
+jobs:
+  setup:
+    <<: *defaults
+    steps:
+      - run: *pdfenv
+      - run: *install
+      - run: *githubsetup
+
+  build:
+    <<: *defaults
+    steps:
+      - run: *install
+      - setup_remote_docker
+      - checkout
+      - run: *pdfenv
+      - run: *test
+      - run: *pdf
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - src
+            - paper
+
+  manifest:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - run: *pdfenv
+      - run: *githubsetup
+      - run: *install
+      - run:
+          name: Generate Paper Manifest
+          no_output_timeout: 40m
+          command: |
+            source ${BASH_ENV}
+            ls /tmp
+            ls /tmp/paper
+            mkdir -p ${HOME}/.ssh
+            if [[ -n "${GITHUB_EMAIL:-}" ]];
+                then
+                    echo "=== Deploying paper to Github Pages ==="
+                    echo "1. Checking out Github pages branch"
+                    ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+                    git clone "git@github.com:${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git" out
+                    cd out
+                    # either checkout github pages, or create orphan
+                    git checkout gh-pages || git checkout --orphan gh-pages
+                    # Save all previous tags, so we don't pull and re-generate
+                    mkdir -p ../out-old
+                    for ext in tar.gz pdf
+                        do
+                        if /bin/bash -c "ls *.${ext}" 1> /dev/null 2>&1; then
+                                /bin/bash -c "cp *.${ext} ../out-old/" 
+                        fi
+                    done                    
+                    git rm -rf .
+                    # ensure that github pages are ignored
+                    mkdir -p .circleci && cp -a ../.circleci/. .circleci/.
+                    # Copy back previous files
+                    for ext in tar.gz pdf
+                        do
+                           if /bin/bash -c "ls ../out-old/*.${ext}" 1> /dev/null 2>&1; then
+                               /bin/bash -c "cp ../out-old/*.${ext} ${PWD}"
+                        fi
+                    done
+                    echo "2. Preparing template..."
+                    cp .circleci/template.html template.html
+                    cp -R .circleci/assets/ ${PWD}
+                    # replace container name in index.html
+                    envsubst < template.html > index.html
+                    echo "3. Generating paper and archive for latest..."
+
+                    # Need to keep latest also as tag
+                    cp /tmp/paper/paper.pdf paper-latest.pdf
+                    cp /tmp/paper/paper.tar.gz paper-latest.tar.gz
+                    cp /tmp/paper/paper.pdf "paper-${PAPER_VERSION}.pdf"
+                    cp /tmp/paper/paper.tar.gz paper-latest.tar.gz
+
+                    git add -A;
+                    git commit -m "Automated deployment to GitHub Pages ${CIRCLE_SHA1}" --allow-empty
+                    git push origin gh-pages
+            else
+                echo "GITHUB_EMAIL not set, skipping manifest deploy to Github pages"
+            fi
+
+
+################################################################################
+# Workflows
+################################################################################
+
+
+workflows:
+  version: 2
+  build_deploy:
+    jobs:
+      - build:
+          filters:
+            branches:
+              ignore: 
+                - gh-pages
+                - docs/*
+            tags:
+              ignore: 
+                - docs/*
+              only: /.*/
+
+      # Push the manifest back to Github pages
+      - manifest:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
+            tags:
+              only: /.*/

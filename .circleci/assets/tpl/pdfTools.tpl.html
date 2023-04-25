@@ -1,0 +1,48 @@
+<h3 class="text-medium text-gray">Keyword Search</h3>
+<div class="row">
+    <div class="col-xs-12">
+        <div class="form-collapse">
+            <div class="input item item-main">
+                <input ng-model="$ctrl.searchQuery" id="name" placeholder="Keyword" type="text">
+            </div>
+            <button class="item button button-primary" ng-click="$ctrl.search({query: $ctrl.searchQuery})">
+                <i class="fa fa-search fa-lg"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+   <div class="col-xs-12 col-md-6">
+      <div class="checkbox">
+         <input id="checkbox1" name="keywords" ng-model="$ctrl.highlightAll" ng-change="$ctrl.onChecked()" type="checkbox">
+         <label for="checkbox1">Highlight All</label>
+      </div>
+   </div>
+
+   <div class="col-xs-12 col-md-6">
+      <ul class="paginator-list paginator-compact">
+          <li class="paginator-list-item">
+              <a href="" ng-click="$ctrl.nextMatch()" class="paginator-list-link"><i class="fa fa-angle-left"></i> </a>
+          </li>
+          <li class="paginator-list-item">
+              <a href="" class="paginator-list-link" ng-click="$ctrl.prevMatch()"><i class="fa fa-angle-right"></i></a>
+          </li>
+      </ul>
+   </div>
+</div>
+
+
+
+
+<h3 class="text-medium text-gray">Keywords</h3>
+<div class="container section bordered">
+    <ul>
+        <li ng-repeat="word in $ctrl.keywords" ng-click="$ctrl.selectKeyword($index)">
+            {{ word }}
+        </li>
+    </ul>
+</div>
+<div>
+    <button class="button block-mobile" ng-click="$ctrl.fullscreen()"><span>Full Screen</span> <i class="fa fa-arrows-alt"></i></button>
+</div>
