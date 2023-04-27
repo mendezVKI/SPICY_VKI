@@ -49,9 +49,14 @@ class spicy:
                 4. 'RANSA', to regress a velocity field with a RANS model without assuming isotropic Reynolds stresses.
                     this becomes [uu, vv, uv] in 2D and [uu, vv, ww, uv, uw, vw] in 3D.
                     NOTE: Currently, RANSA is only implemented in 3D.                            
+        
         :param data: list
-            Is a list of arrays containing [u] if the model is scalar,
-            [u, v] for a 2D vector field and [u, v, w] for a 3D field.
+            If the instance is to be used to solve a regression problem, this 
+            list contains the target data.
+            This is an array [u] if the model is scalar,
+            two arrays [u, v] for a 2D vector field and [u, v, w] for a 3D field.
+            If the instance is to be used to solve the Poisson equation, this list contains
+            the forcing term on the RHS of the Poisson equation.
                     
         :param grid_point: list
             Is a list of arrays containing the grid point [X_G ,Y_G] in 2D and [X_G, Y_G, Z_G] in 3D.   
@@ -98,6 +103,13 @@ class spicy:
         c_k: shape parameters of the RBFs 
         d_k: diameters of the rbfs  
        
+        If problem is assembled:
+        
+        A: matrix A in the linear system
+        B: matrix B in the linear system
+        b_1: vector b_1 in the linear systems
+        b_2: vector b_2 in the linear system       
+        
         If computation is done: 
             
         weights: weights of the RBF regression 
@@ -857,7 +869,7 @@ class spicy:
     # the regression one inlcudes a potential penalty of a divergence free flow.
 
     # 4.1. Poisson solver
-    def Assembly_Poisson(self, source_terms, n_hb=0):
+    def Assembly_Poisson(self, n_hb=0):
         """
         This function assembly the matrices A, B, C, D from the paper.
         TODO. Currently implemented only for model='scalar'
@@ -866,13 +878,7 @@ class spicy:
         ------------------------------------------------------------------------
         Parameters
         ------------------------------------------------------------------------
-        :param source_terms: array
-            This is relevant only in the 'scalar' model. 
-            This vector contains the values for the source term on all the given points (term s in eq 27).
-            To solve the Laplace equation, it should be a vector of zeros.
-            To solve the Poisson equation for the pressure, this is the RHS of eq.21.
-            In any case, the specification of the RHS is done outside the assembly function.
-             
+
         :param n_hb: string (currently not active)
             When solving the Poisson equation, global basis elements such as polynomials or series
             expansions are of great help. This is evident if one note that the eigenfunctions of 
@@ -899,6 +905,10 @@ class spicy:
         assert type(n_hb) == int, 'Number of harmonic basis must be an integer'
         # assert len(source_terms.shape) == 1, 'Source terms must be a 1D numpy array'
         
+        
+        source_terms=self.u
+        
+        
         # Assign the number of harmonic basis functions
         self.n_hb = n_hb
         # get the number of basis and points as we need them a couple of times
@@ -917,10 +927,7 @@ class spicy:
                  self.rescale = 1    
                 else:
                  self.rescale=R 
-                 
-                source_terms = self.u
-                self.rescale = max(np.max(source_terms), -np.max(-source_terms))    
-                
+                                      
                 # Approach 1: we build A, B, b1, b2 as in the article from Sperotto
                 L = np.hstack((
                     Phi_H_2D_Laplacian(self.X_G, self.Y_G, self.n_hb),
@@ -1642,11 +1649,19 @@ class spicy:
             Contains the points at which the source term is evaluated
             If the model is 2D, then this has [X_P, Y_P].
             If the model is 3D, then this has [X_P, Y_P, Z_P].
+            
+        :return: U_P, V_P, W_P.  
+        Depending on model='scalar/laminar' and type='2D/3D'    
+        If scalar, the solution is only U_P.
+        If laminar and 2D, the solution is U_P, V_P
+        If laminar and 3D, the solution is U_P, V_P and W_P
+        
         """   
         
         # Check the input is correct
         assert type(grid) == list, 'grid must be a list'
         
+                
         # check if this instance has a 2D 
         if len(grid) == 2 and self.type == '2D': # 2D 
             # Assign the grid
@@ -1726,21 +1741,198 @@ class spicy:
         else:
             raise ValueError('Length of Grid is invalid for Type ' + self.type)
             
-        return U_P
+       
 
 
 
-    def Get_dUdx(self,grid):
+    def Get_first_Derivatives(self,grid):
+        ''' Compute all derivatives from the RBF solution 
+        The input parameters are 
+        ------------------------------------------------------------------------
+        Parameters
+        ------------------------------------------------------------------------
+        :param grid: list 
+            Contains the points at which the source term is evaluated
+            If the model is 2D, then this has [X_P, Y_P].
+            If the model is 3D, then this has [X_P, Y_P, Z_P].
+
+        :return: dudx, dudy, dudx/ dvdx, dvdy, dvdx/ dwdx, dwdy, dwdx.
         
+        Depending on model='scalar/laminar' and type='2D/3D'    
+        If scalar and 2D, the output is dudx, dudy
+        If scalar and 3D, the output is dudx, dudy, dudz        
+        If laminar and 2D, the solution is dudx, dudy, dvdx, dvdy
+        If laminar and 3D, the solution is dudx,dudy,dudx,dvdx,dvdy,dvdx,dwdx,dwdy,dwdx, 
+            
+        ''' 
         
-        return dUdx
+        # Check the input is correct
+        assert type(grid) == list, 'grid must be a list'
         
+                
+        # check if this instance has a 2D 
+        if len(grid) == 2 and self.type == '2D': # 2D 
+            # Assign the grid
+            X_P = grid[0]
+            Y_P = grid[1]
+            # number of points on the new grid
+            n_p = X_P.shape[0]
+            
+            # Check what model type we have
+            if self.model == 'scalar': # Scalar
+                # Evaluate Phi_x on the grid X_P,Y_P
+                Phi_x=np.hstack((
+                    Phi_H_2D_x(X_P, Y_P, self.n_hb),
+                    Phi_RBF_2D_x(X_P, Y_P, self.X_C, self.Y_C, self.c_k, self.basis)
+                    ))  
+                # Evaluate Phi_y on the grid X_P,Y_P
+                Phi_y=np.hstack((
+                    Phi_H_2D_y(X_P, Y_P, self.n_hb),
+                    Phi_RBF_2D_y(X_P, Y_P, self.X_C, self.Y_C, self.c_k, self.basis)
+                    ))                 
+                # Compute dudx and dudy on the new grid
+                dudx=Phi_x.dot(self.weights)
+                dudy=Phi_y.dot(self.weights)
+                return dudx, dudy
+                
+            elif self.model == 'laminar': # Laminar
+                # We do it in 2 blocks: first all derivatives in x
+                # Evaluate Phi on the grid X_P, Y_P
+                Phi_Sub=np.hstack((
+                    Phi_H_2D_x(X_P, Y_P, self.n_hb),
+                    Phi_RBF_2D_x(X_P, Y_P, self.X_C, self.Y_C, self.c_k, self.basis)
+                    ))
+                # Create the block structure of equation (16)
+                Phi = np.block([
+                    [Phi_Sub, np.zeros((n_p, self.n_b))],
+                    [np.zeros((n_p, self.n_b)), Phi_Sub]
+                    ])
+                # compute the solution
+                U_f=Phi.dot(self.weights)
+                dudx = U_f[:n_p]
+                dvdx = U_f[n_p:]     
+                
+                # Then we do it again for the derivatives of y.
+                # Note however, that we re-use the same variables Phi_Sub and Phi
+                # to limit the memory usage. This is pretty much copy-paste.
+                Phi_Sub=np.hstack((
+                    Phi_H_2D_y(X_P, Y_P, self.n_hb),
+                    Phi_RBF_2D_y(X_P, Y_P, self.X_C, self.Y_C, self.c_k, self.basis)
+                    ))
+                # Create the block structure of equation (16)
+                Phi = np.block([
+                    [Phi_Sub, np.zeros((n_p, self.n_b))],
+                    [np.zeros((n_p, self.n_b)), Phi_Sub]
+                    ])
+                # compute the solution
+                U_f=Phi.dot(self.weights)
+                dudy = U_f[:n_p]
+                dvdy = U_f[n_p:]     
 
-
-
-
-
-
+                return dudx,dudy,dvdx,dvdy
+                
+        elif len(grid) == 3 and self.type == '3D': # 3D
+            # Assign the grid
+            X_P = grid[0]
+            Y_P = grid[1]
+            Z_P = grid[2]
+            # number of points on the new grid
+            n_p = X_P.shape[0]
+            
+            # Check what model type we have
+            if self.model == 'scalar': # Scalar
+                # Evaluate Phi derivatives on the grid X_P,Y_P, Z_P.
+                # We repeat the calculation of the three derivatives using
+                # the same matrices. Here is for dudx
+                Phi=np.hstack((
+                    Phi_H_3D_x(X_P, Y_P, Z_P, self.n_hb),
+                    Phi_RBF_3D_x(X_P, Y_P, Z_P, self.X_C, self.Y_C, self.Z_C, self.c_k, self.basis)
+                    ))  
+                # Compute dudx on the new grid
+                dudx=Phi.dot(self.weights)
+                # Now again for the derivative on dudy
+                Phi=np.hstack((
+                    Phi_H_3D_y(X_P, Y_P, Z_P, self.n_hb),
+                    Phi_RBF_3D_y(X_P, Y_P, Z_P, self.X_C, self.Y_C, self.Z_C, self.c_k, self.basis)
+                    ))  
+                # Compute dudx on the new grid
+                dudy=Phi.dot(self.weights)                
+                # Now again for the derivative on dudz
+                Phi=np.hstack((
+                    Phi_H_3D_z(X_P, Y_P, Z_P, self.n_hb),
+                    Phi_RBF_3D_z(X_P, Y_P, Z_P, self.X_C, self.Y_C, self.Z_C, self.c_k, self.basis)
+                    ))  
+                # Compute dudx on the new grid
+                dudz=Phi.dot(self.weights)                  
+                return dudx,dudy,dudz
+                
+            elif self.model == 'laminar': # Laminar
+                # Evaluate Phi derivatives on the grid X_P,Y_P, Z_P. 
+                # We repeat it 3 times for each derivative and stack
+                # all components into one single vector at each step
+                # This can be improved later. We use always the same
+                # matrices for memory efficiency
+                    
+                # All derivatives along x -------------------------
+                Phi_Sub=np.hstack((
+                     Phi_H_3D_x(X_P, Y_P, Z_P, self.n_hb),
+                     Phi_RBF_3D_x(X_P, Y_P, Z_P, self.X_C, self.Y_C, self.Z_C, self.c_k, self.basis)
+                     ))
+                # Create the block structure of equation (16)
+                Phi = np.block([
+                    [Phi_Sub, np.zeros((n_p, self.n_b)), np.zeros((n_p, self.n_b))],
+                    [np.zeros((n_p, self.n_b)), Phi_Sub, np.zeros((n_p, self.n_b))],
+                    [np.zeros((n_p, self.n_b)), np.zeros((n_p, self.n_b)), Phi_Sub]
+                    ])
+                # compute the solution
+                U_f=Phi.dot(self.weights)
+                dudx = U_f[0*n_p:1*n_p]
+                dvdx = U_f[1*n_p:2*n_p]              
+                dwdx = U_f[2*n_p:3*n_p]
+                
+                # All derivatives along y -------------------------
+                Phi_Sub=np.hstack((
+                     Phi_H_3D_y(X_P, Y_P, Z_P, self.n_hb),
+                     Phi_RBF_3D_y(X_P, Y_P, Z_P, self.X_C, self.Y_C, self.Z_C, self.c_k, self.basis)
+                     ))
+                # Create the block structure of equation (16)
+                Phi = np.block([
+                    [Phi_Sub, np.zeros((n_p, self.n_b)), np.zeros((n_p, self.n_b))],
+                    [np.zeros((n_p, self.n_b)), Phi_Sub, np.zeros((n_p, self.n_b))],
+                    [np.zeros((n_p, self.n_b)), np.zeros((n_p, self.n_b)), Phi_Sub]
+                    ])
+                # compute the solution
+                U_f=Phi.dot(self.weights)
+                dudy = U_f[0*n_p:1*n_p]
+                dvdy = U_f[1*n_p:2*n_p]              
+                dwdy = U_f[2*n_p:3*n_p]
+                
+                # All derivatives along z -------------------------
+                Phi_Sub=np.hstack((
+                     Phi_H_3D_z(X_P, Y_P, Z_P, self.n_hb),
+                     Phi_RBF_3D_z(X_P, Y_P, Z_P, self.X_C, self.Y_C, self.Z_C, self.c_k, self.basis)
+                     ))
+                # Create the block structure of equation (16)
+                Phi = np.block([
+                    [Phi_Sub, np.zeros((n_p, self.n_b)), np.zeros((n_p, self.n_b))],
+                    [np.zeros((n_p, self.n_b)), Phi_Sub, np.zeros((n_p, self.n_b))],
+                    [np.zeros((n_p, self.n_b)), np.zeros((n_p, self.n_b)), Phi_Sub]
+                    ])
+                # compute the solution
+                U_f=Phi.dot(self.weights)
+                dudz = U_f[0*n_p:1*n_p]
+                dvdz = U_f[1*n_p:2*n_p]              
+                dwdz = U_f[2*n_p:3*n_p]
+                
+                
+                return dudx,dudy,dudz,dvdx,dvdy,dvdz,dwdx,dwdy,dwdz
+                
+                
+        else:
+            raise ValueError('Length of Grid is invalid for Type ' + self.type)
+         
+        
+   
 
     # Here is a function to evaluate the forcing term on the grid points that are 
     # used for the pressure

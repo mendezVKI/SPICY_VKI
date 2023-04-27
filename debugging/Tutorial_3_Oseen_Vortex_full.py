@@ -8,7 +8,7 @@ Created on Mon Mar  6 17:54:28 2023
 import numpy as np
 import matplotlib.pyplot as plt 
 import scipy.special as sc 
-from spicy_class_2103 import spicy 
+from spicy_class_m import spicy 
 
 # This is for plot customization
 plt.rc('text', usetex=True)      
@@ -88,9 +88,8 @@ SP_vel.Assembly_Regression(n_hb = 0, alpha_div = 1)
 
 SP_vel.Solve(K_cond=1e8)
 
-solution_P=SP_vel.Get_Sol(grid = [X,Y])
-U_P = solution_P[:n_p]
-V_P = solution_P[n_p:]
+U_P, V_P=SP_vel.Get_Sol(grid = [X,Y])
+
 
 # Magnitude of the RBF solution
 U_magn_fit = np.sqrt(U_P**2 + V_P**2)
