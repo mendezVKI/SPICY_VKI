@@ -5,8 +5,6 @@ Created on Fri Jan 13 13:39:31 2023
 @author: mendez
 """
 
-
-
 #%% Debugging of clustering + RBF plotting
 
 

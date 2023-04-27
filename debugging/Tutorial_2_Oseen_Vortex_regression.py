@@ -7,7 +7,7 @@ Created on Mon Mar  6 17:54:28 2023
 
 import numpy as np
 import matplotlib.pyplot as plt 
-from spicy_class_2103 import spicy 
+from spicy_class_m import spicy 
 
 # This is for plot customization
 fontsize = 16
@@ -23,13 +23,13 @@ plt.rcParams['font.size'] = fontsize
 np.random.seed(42)
 
 # Number of particles
-n_p = 5000
+n_p = 500
 
 # Define the domain boundaries and flow properties
 x1_hat, x2_hat = -0.5, 0.5 # m, m
 y1_hat, y2_hat = -0.5, 0.5 # m, m
 rho = 1 # kg/m^3
-mu = 0 # Pa s
+mu = 0 # Pa s 
 
 # Generate the random points
 X = np.random.random(n_p)*(x2_hat - x1_hat) + x1_hat
@@ -55,12 +55,16 @@ q = 0.1
 U_noise = U * (1 + q*np.random.uniform(-1, 1, size = U.shape))
 V_noise = V * (1 + q*np.random.uniform(-1, 1, size = V.shape))
 
-SP_vel = spicy([U_noise], [X,Y], basis='gauss')
+# Step 1: Initialize the object 
+SP_vel = spicy([U_noise], [X,Y], basis='c4')
 
+# Step 2: Cluster 
 SP_vel.clustering([6,50], r_mM=[0.05,0.7], eps_l=0.88)
 
+# Step 3: set up constraints: (none!)
 SP_vel.scalar_constraints()
 
+# Step 4: plot the resulting velocity
 SP_vel.plot_RBFs()
 
 SP_vel.Assembly_Regression(n_hb = 0)

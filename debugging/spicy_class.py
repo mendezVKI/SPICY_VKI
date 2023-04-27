@@ -79,7 +79,6 @@ class spicy:
         
         RSI: Reynolds stress in case of isotropic flow (active for RANSI)
         
-        [...] TODO Manuel please finalize this documentation (also including the methods)
         
         ------------------------------------------------------------------------
         Methods

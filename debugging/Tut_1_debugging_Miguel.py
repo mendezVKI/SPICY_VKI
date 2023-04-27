@@ -8,7 +8,7 @@ Created on Tue Apr 25 18:34:47 2023
 
 import numpy as np
 import matplotlib.pyplot as plt 
-from spicy_class_2103 import spicy 
+from spicy_class_m import spicy 
 
 
 # This is for plot customization

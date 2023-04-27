@@ -146,7 +146,7 @@ DIR = [X_Dir, Y_Dir, U_Dir, V_Dir]
 
 # Step 2: Perform the clustering
 # SP_vel.clustering([3.5,30], r_mM=[0.0025, 0.2], eps_l=0.8) # Gaussian
-SP_vel.clustering([4,20], r_mM=[0.005, 0.2], eps_l=0.8)
+SP_vel.clustering([4,20,50,100], r_mM=[0.005, 0.3], eps_l=0.8)
 
 # Step 3: Set the constraints
 SP_vel.vector_constraints(DIR = DIR, DIV = DIV, extra_RBF = True)
@@ -168,7 +168,7 @@ SP_vel.plot_RBFs()
 SP_vel.Assembly_Regression(n_hb = 0, alpha_div = 1)
 
 # Step 5. Solve the linear system
-SP_vel.Solve(K_cond=1e12)
+SP_vel.Solve(K_cond=1e11)
 
 # Step 6. Get the solution on the scattered data points again
 solution_P = SP_vel.Get_Sol(grid = [X,Y])
@@ -195,6 +195,8 @@ U_magn_corr = np.sqrt(U**2 + V**2)
 error_magn = np.linalg.norm(U_magn_fit - U_magn_corr) / np.linalg.norm(U_magn_corr)
 # print it
 print('Error total: ' + str(error_magn))
+
+
 
 source_term = SP_vel.Evaluate_Source_Term(grid = [X, Y], rho = rho)
 
@@ -266,10 +268,10 @@ SP_pres = spicy([np.zeros(X.shape)], [X, Y], basis = basis)
 # 2.: Perform the clustering
 # We take the same one as for the velocity regression, I did not yet test
 # what the benefits of varying the clustering might be
-SP_pres.clustering([4, 20], r_mM=[0.005, 0.2], eps_l=0.8)
+SP_pres.clustering([4,20], r_mM=[0.005, 0.2], eps_l=0.8)
 
 # 3.: Set boundary conditions
-SP_pres.scalar_constraints(DIR = DIR_P, NEU = NEU_P, extra_RBF = True)
+SP_pres.scalar_constraints(DIR = DIR_P, NEU = NEU_P, extra_RBF = False)
 # SP_pres.scalar_constraints(NEU = NEU_P, extra_RBF = True)
 # SP_pres.scalar_constraints(DIR = DIR_P, extra_RBF = True)
 
@@ -305,5 +307,5 @@ print('Error total, pressure: ' + str(error_p))
 # plt.colorbar(cont)
 
 plt.figure()
-cont = plt.scatter(X, Y, c = P_calc - P)
+cont = plt.scatter(X, Y, c =  P)
 plt.colorbar(cont)
