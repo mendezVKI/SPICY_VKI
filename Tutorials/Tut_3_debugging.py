@@ -144,17 +144,17 @@ poly2 = geometry.Polygon([i for i in pointList])
 
 plt.plot(*poly2.exterior.xy,'r') # in case you want to see them for info
 
-List_Poly=[poly1,poly2,[]] # the third scale acts on the full domain
+List_Poly=[poly1,poly2,[],[]] # the third scale acts on the full domain
 
 
 # Prepare the SPICY object
 SP_vel = spicy([U_noise,V_noise], [X,Y], basis='gauss')
 # Clustering 
-SP_vel.clustering([3,6,50], Areas=List_Poly, r_mM=[0.015,0.5], eps_l=0.83)
+SP_vel.clustering([3,6,50,200], Areas=List_Poly, r_mM=[0.015,0.3], eps_l=0.83)
 # Introduce the Constraints
 SP_vel.vector_constraints(DIR=DIR, DIV=DIV, extra_RBF=True)
 # Plot the RBF cluster
-SP_vel.plot_RBFs(l=0)
+SP_vel.plot_RBFs(l=3)
 # Assembly the system
 SP_vel.Assembly_Regression(alpha_div=1) 
 # Solve the system
@@ -289,10 +289,10 @@ P_Pres_D = np.hstack([np.zeros(X_Pres_D3.shape),P_S])
 # Y_Pres_D = Y_Pres_D3
 # P_Pres_D = np.zeros(X_Pres_D.shape)
 
-List_Poly=[poly1,poly2,[],[]]
+List_Poly=[poly1,poly2,[],[],[]]
 
 SP_pres = spicy([source_term], [X,Y], basis='gauss')
-SP_pres.clustering([3,5,50,1000], Areas=List_Poly, r_mM=[0.015,0.5], eps_l=0.83)
+SP_pres.clustering([3,10,50,200,1000], Areas=List_Poly, r_mM=[0.015,0.4], eps_l=0.87)
 
 # We assemble our Neumann and Dirichlet B.C.
 NEU_P = [X_Pres_N, Y_Pres_N, n_x, n_y, P_Neu]
@@ -303,11 +303,11 @@ SP_pres.scalar_constraints(DIR=DIR_P,
                            NEU=NEU_P, 
                            extra_RBF=True)
 
-SP_pres.plot_RBFs()
+SP_pres.plot_RBFs(l=4)
 
 
 SP_pres.Assembly_Poisson(n_hb = 0)
-SP_pres.Solve(K_cond=1e12)
+SP_pres.Solve(K_cond=1e7)
 P_calc = SP_pres.Get_Sol(grid=[X,Y])
 # print the pressure error
 error_p = np.linalg.norm(P_calc-P)/np.linalg.norm(P)
