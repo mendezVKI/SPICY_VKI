@@ -24,7 +24,11 @@ import matplotlib.pyplot as plt
 from scipy.sparse.linalg import eigsh
 # we use scipy linalg for cholesky decomposition, solving linear systems etc
 from scipy import linalg
- 
+
+# We use this function to handle polygonal refinements areas 
+from shapely import geometry
+
+
 
     
 class spicy:
@@ -181,7 +185,7 @@ class spicy:
     
     
     # 2. Clustering (this does not depend on the model, but only on the dimension).
-    def clustering(self, n_K, r_mM=[0.01,0.3], eps_l=0.7):
+    def clustering(self, n_K, Areas, r_mM=[0.01,0.3], eps_l=0.7):
         """
         This function defines the collocation of a set of RBFs using the multi-level clustering
         described in the article. The function must be run before the constraint definition.
@@ -221,18 +225,32 @@ class spicy:
         
         # Check if we are dealing with a 2D or a 3D case
         if self.type=='2D': # This is 2D
-            # Number of data points
-            # Stack the coordinates in a matrix:
-            Data_matrix = np.column_stack((self.X_G, self.Y_G))
+ 
             # Number of levels
             n_l = len(n_K)  
             
             # Loop over the number of levels
             for l in range(n_l):
+                # We look for the points that belongs to the given area:
+                if Areas[l]:
+                 # This means a polygon object is given, so take only points
+                 # inside this:
+                 poly=Areas[l]    
+                 List=[]    # prepare empty list
+                 for j in range(len(self.X_G)): # fill list of points in poly
+                  List.append(poly.contains(geometry.Point(self.X_G[j],self.Y_G[j])))
+                 # Take only these points as data matrix 
+                 X_G_c=self.X_G[List]; Y_G_c=self.Y_G[List]                   
+                 Data_matrix=np.column_stack((X_G_c, Y_G_c))
+                 List=[] # delete the list for safety
+                else: # if Areas is empty then all points should be included
+                 Data_matrix = np.column_stack((self.X_G, self.Y_G))
+                
                 # Define number of clusters
-                Clust = int(np.ceil(self.n_p / n_K[l])) 
+                Clust = int(np.ceil(np.shape(Data_matrix)[0]/ n_K[l])) 
+                
                 # Initialize the cluster function
-                model = MiniBatchKMeans(n_clusters=Clust, random_state=0)    
+                model = MiniBatchKMeans(n_clusters=Clust, random_state=0)  
                 # Run the clustering and return the indices (optional)
                 y_P = model.fit_predict(Data_matrix)
                 # Obtaining the centers of the points
@@ -250,21 +268,30 @@ class spicy:
                 # Pre-assign the collocation points
                 X_C1 = Centers[:,0]
                 Y_C1 = Centers[:,1]
+                list_Index=np.array([l]*len(X_C1)) # to use also hstack
                 
                 # Assign the results to a vector of collocation points
                 if l == 0: # If this is the first layer, just assign:
                     X_C = X_C1 
                     Y_C = Y_C1 
                     sigma = sigma1 
+                    l_list=list_Index
                 else: # Stack onto the existing ones
                     X_C = np.hstack((X_C, X_C1))
                     Y_C = np.hstack((Y_C, Y_C1))
                     sigma = np.hstack((sigma, sigma1))
+                    l_list=np.hstack((l_list,list_Index))
                 print('Clustering level '+str(l)+' completed')
             
             # Assign to the class
             self.X_C = X_C
             self.Y_C = Y_C
+            print(str(len(X_C))+' RBFs placed')
+            # For plotting purposes, we keep track of the scale at which
+            # the RBF have been places
+            self.list=l_list
+            
+            
         
         elif self.type == '3D': # This is 3D
             # Stack the coordinates in a matrix:
@@ -803,41 +830,58 @@ class spicy:
         return
         
     # 3.3 Plot the RBFs, this is just a visualization tool
-    def plot_RBFs(self):
+    def plot_RBFs(self,l=0):
         """
         Utility function to check the spreading of the RBFs after the clustering.
         No input is required, nothing is assigned to SPICY and no output is generated.
+        
+        ------------------------------------------------------------------------
+        Parameters
+        ------------------------------------------------------------------------
+        :param l: integer
+            This defines the cluster level of RBF that will be visualized.
+            
+            
         """
         
         # check if it is 2D or 3D
         if self.type == '2D': # 2D
             try:  
-                fig, axs = plt.subplots(1, 2, figsize = (10, 5), dpi = 100)
+                
+                # We define the data that will be influded
+                X_Plot=self.X_C[np.argwhere(self.list==l)]
+                Y_Plot=self.Y_C[np.argwhere(self.list==l)]
+                d_K_Plot=self.d_k[np.argwhere(self.list==l)]
+                
+                fig, axs = plt.subplots(1, 2, figsize = (7, 3.5), dpi = 100)
+
                 # First plot is the RBF distribution
-                axs[0].set_title("RBF Collocation")
-                for i in range(0,len(self.X_C),1):
-                    circle1 = plt.Circle((self.X_C[i], self.Y_C[i]), self.d_k[i]/2, 
+                axs[0].set_title("RBF Collocation for l="+str(l))
+                
+                # also show the data points
+                if self.model == 'scalar':
+                     axs[0].scatter(self.X_G, self.Y_G, c=self.u, s=10)
+                elif self.model == 'laminar':
+                     axs[0].scatter(self.X_G, self.Y_G, c=np.sqrt(self.u**2 + self.v**2), s=10)    
+                
+                for i in range(0,len(X_Plot),1):
+                    circle1 = plt.Circle((X_Plot[i], Y_Plot[i]), d_K_Plot[i]/2, 
                                           fill=True,color='g',edgecolor='k',alpha=0.2)
                     axs[0].add_artist(circle1)  
-                # also show the data points
-                # if self.model == 'scalar':
-                #     axs[0].scatter(self.X_G, self.Y_G, c=self.u, s=10)
-                # elif self.model == 'laminar':
-                #     axs[0].scatter(self.X_G, self.Y_G, c=np.sqrt(self.u**2 + self.v**2), s=10)
-                
+
                 # also show the constraints if they are set
                 axs[0].plot(self.X_D, self.Y_D,'ro')
                 axs[0].plot(self.X_N, self.Y_N,'bs')
-                # if self.model == 'laminar':
-                #     axs[0].plot(self.X_Div, self.Y_Div, 'gd')
+                if self.model == 'laminar':
+                     axs[0].plot(self.X_Div, self.Y_Div, 'bd')
                # axs[0].set_xlim(-0.52, 0.52) # let is automatic; we do not know the domain
                # axs[0].set_ylim(-0.52, 0.52)
  
                 # second plot is the distribution of diameters:
-                axs[1].stem(self.d_k)
+                axs[1].stem(d_K_Plot)
                 axs[1].set_xlabel('Basis index')
                 axs[1].set_ylabel('Diameter') 
-                axs[1].set_title("Distribution of diameters")
+                axs[1].set_title("Distribution of diameters for L="+str(l))
                 fig.tight_layout()
            
             except:
@@ -1572,7 +1616,7 @@ class spicy:
         # 1.: We have constraints, then B and b_2 are not empty and we go for Schur complements
         # 2.: We do not have constraints, then we only need to solve A*w = b_1
         if (self.B.size == 0) and (self.b_2.size == 0):
-            print('Solving without constriaints')
+            print('Solving without cconstraints')
             
             # Step 1: Regularize the matrix A
             lambda_A = eigsh(self.A, 1, return_eigenvectors=False) # Largest eigenvalue
@@ -1588,7 +1632,7 @@ class spicy:
             
             
         elif (self.B.size != 0) and (self.b_2.size != 0):
-            print('Solving with constriaints')
+            print('Solving with constraints')
             
             # Step 1: Regularize the matrix A
             lambda_M = eigsh(self.A, 1, return_eigenvectors=False) # Largest eigenvalue

@@ -82,7 +82,11 @@ DIR = [X_Dir, Y_Dir, U_Dir]
 SP.scalar_constraints(DIR=DIR, extra_RBF=True)
 
 # Plot the RBFs and the clusters
-SP.plot_RBFs()
+SP.plot_RBFs(l=1)
+
+SP.plot_RBFs(l=2)
+
+
 
 # Assembly Solver
 SP.Assembly_Poisson()
