@@ -10,15 +10,15 @@ tags:
 authors:
   - name: Pietro Sperotto
     orcid: 0000-0000-0000-0000
-    equal-contrib: true
+    #equal-contrib: true
     affiliation: 1 # (Multiple affiliations must be quoted)
   - name: M. Ratz
-    equal-contrib: true # (This is how you can denote equal contributions between multiple authors)
+    #equal-contrib: true # (This is how you can denote equal contributions between multiple authors)
     orcid: 0009-0008-8491-8367
     affiliation: 1
   - name: M. A. Mendez
     orcid: 0000-0002-1115-2187
-    equal-contrib: true
+    #equal-contrib: true
     corresponding: true # (This is how to denote the corresponding author)
     affiliation: 1
 affiliations:
