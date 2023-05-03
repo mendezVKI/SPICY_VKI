@@ -14,8 +14,11 @@ authors:
     affiliation: "1, 2" # (Multiple affiliations must be quoted)
   - name: M. Ratz
     equal-contrib: true # (This is how you can denote equal contributions between multiple authors)
+    orcid: 0000-0000-0000-0000
     affiliation: 1
   - name: M. A. Mendez
+    orcid: 0000-0002-1115-2187
+    equal-contrib: true
     corresponding: true # (This is how to denote the corresponding author)
     affiliation: 1
 affiliations:
@@ -37,6 +40,7 @@ bibliography: paper.bib
 
 This work presents our `SPICY' (meshlesS Pressure from Image veloCimetrY) toolbox for meshless data assimilation in image velocimetry. The proposed approach allows for computing an analytic representation of velocity and pressure fields from noisy and sparse fields, regardless of whether these are acquired using cross-correlation or particle tracking algorithms. SPICY uses penalized and constrained Radial Basis Functions (RBFs), allowing for enforcing physical priors (e.g., divergence-free in incompressible flows) or boundary conditions (e.g., no slip). The resulting analytic expression allows for super-resolution on arbitrary points and accurate computation of derivatives. These could be used to compute derived quantities (e.g., vorticity) and integrate the pressure Poisson equation to compute pressure fields in the case of incompressible flows.
 A set of video tutorials on how to use SPICY is made available with the submission.
+
 # Statement of need
 
 Data assimilation methods are becoming increasingly crucial in image velocimetry, thanks to high spatial and temporal resolutions available with modern interrogation processing methods [@Sciacchitano]. Assimilation techniques optimally combine measurements and first principle models (e.g. conservation laws) to maximize noise removal, reach measurement super-resolution, and compute related quantities such as vorticity and pressure fields. Several methods have been proposed in the literature and assessed in the framework of the European project HOMER (Holistic Optical Metrology for Aero-Elastic Research), grant agreement number 769237 . The most classic approaches for the velocity assimilation involve regression of the particle trajectories (as in TrackFit by [@Gesemann2016]), while the computation of derived quantities is usually carried out by first mapping the tracks onto Eulerian grids and then solving the relevant PDEs using standard CFD approaches (as in [Schneiders2016a, Agarwal2021] ).  
@@ -46,6 +50,7 @@ Recently, in [@Sperotto2022], we proposed a meshless approach based on constrain
 
 
 # Tutorials and ongoing works
+
 A total of five tutorials have been published in the repository, allowing for reproducing the results in [@Sperotto2022]. The first tutorial presents the use of SPICY for solving the Laplace Equation in 2D while tutorials two and three focus on the velocity regression and pressure computation on 2D velocity fields with or without the divergence free constraints. Finally, tutorial four tackles a 3D case, namely the Stokes flow past a sphere. The solver currently implemented is a small variant of the direct approach proposed in the original publication. Ongoing works are the extension to Reynolds average formulation to treat turbulent flows, as presented in [@Sperotto2022b] and the implementation of a Partition of Unity (PUM) approach to limit the memory usage as in [@Ratz2022a].
 
 
