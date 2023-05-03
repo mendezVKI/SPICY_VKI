@@ -36,120 +36,21 @@ bibliography: paper.bib
 # Summary
 
 This work presents our `SPICY' (meshlesS Pressure from Image veloCimetrY) toolbox for meshless data assimilation in image velocimetry. The proposed approach allows for computing an analytic representation of velocity and pressure fields from noisy and sparse fields, regardless of whether these are acquired using cross-correlation or particle tracking algorithms. SPICY uses penalized and constrained Radial Basis Functions (RBFs), allowing for enforcing physical priors (e.g., divergence-free in incompressible flows) or boundary conditions (e.g., no slip). The resulting analytic expression allows for super-resolution on arbitrary points and accurate computation of derivatives. These could be used to compute derived quantities (e.g., vorticity) and integrate the pressure Poisson equation to compute pressure fields in the case of incompressible flows.
-A set of video tutorials on how to use SPICY is made available on [This is an external link to genome.gov](https://www.genome.gov/)
-
+A set of video tutorials on how to use SPICY is made available with the submission.
 # Statement of need
 
-- 1-page to explain the ROM problem (loosely) and give working-knowledge to user
-- 2 rows to explain whom this package is intended to
-- 5 rows to present the available material in the repo 
+Data assimilation methods are becoming increasingly crucial in image velocimetry, thanks to high spatial and temporal resolutions available with modern interrogation processing methods [@Sciacchitano]. Assimilation techniques optimally combine measurements and first principle models (e.g. conservation laws) to maximize noise removal, reach measurement super-resolution, and compute related quantities such as vorticity and pressure fields. Several methods have been proposed in the literature and assessed in the framework of the European project HOMER (Holistic Optical Metrology for Aero-Elastic Research), grant agreement number 769237 . The most classic approaches for the velocity assimilation involve regression of the particle trajectories (as in TrackFit by [@Gesemann2016]), while the computation of derived quantities is usually carried out by first mapping the tracks onto Eulerian grids and then solving the relevant PDEs using standard CFD approaches (as in [Schneiders2016a, Agarwal2021] ).  
 
-When dealing with complex, nonlinear, multi-scale phenomena it is needed to unveil the patterns hidden behind the ensemble viewpoint. This is a common issue shared with several applied sciences - put some examples. In Fluid Mechanics this is a fundamental problem, as many fluidic phenomena do possess several coherent structures in both time and space. The efforts of the community could be divided broadly in two categories: _energy-based_ and _frequency-based_. 
-The following is intended to give a working knowledge to the reader, posing a common definition for the modal reduction problem, and overviews the main characteristics of the different techniques implemented in `MODULO`. 
-
-Modal analysis decomposes a given dataset into a _linear_ combination of 'rank-1' portions, called _modes_ $\mathcal{M}$. Each mode can be intended as composed by a spatial ($\phi$) and temporal structure ($\psi$), which are weighted by some amplitude coefficient ($\sigma$). Thus, 
-
-$$ D(x_i, t_k) \rightarrow D\big[i, k\big] = \sum_{r=i}^R \mathcal{M}_k \big[i, k\big] = \sum_{r=1}^R \sigma_r\phi_r\big[ i]\psi\big[k\big] $$
-
-Or, equivalently, in a matrix form: 
-
-$$ D = \Phi \Sigma \Psi^T $$
-
-Being $\Psi$ the spatial matrix: 
-
-$$ 
-\mathbf{\Phi} = 
-\begin{bmatrix}
-\phi_1[i] & \phi_2[i] & ... & \phi_R[i] \\ 
-\vdots & \vdots & \vdots
-\end{bmatrix}
-$$
-
-$\Sigma$ the energy contribution matrix, 
-
-$$
-\Sigma = 
-\begin{bmatrix}
-\sigma_1 & 0 & ... & 0 \\ 
-0 & \sigma_2 & ... & 0 \\ 
-0 & 0 & \ddots & 0 \\
-0 & 0 & ... & \sigma_{nt}
-\end{bmatrix}
-$$
-
-and $\Psi$ the temporal basis matrix, 
-
-$$
-\Psi = 
-\begin{bmatrix}
-\psi_1[k] & \psi_2[k] & ... & \psi_R[k] \\ 
-\vdots & \vdots & \vdots & \vdots
-\end{bmatrix}
-$$
-
-Each technique differs in term of computation and, consequently, meaning of these modes but the equation above still holds.
+Alternatives mesh-free methods are the second-generation Flowfit [@Gesemann2016], which combines the velocity regression and the pressure integration into a large nonlinear optimization problem, and methods based on physics-informed neural networks (PINNs) [@Rao2020,] which uses penalized artificial neural networks to solve for the velocity and the pressure fields. 
+Recently, in [@Sperotto2022], we proposed a meshless approach based on constrained Radial Basis Functions (RBFs) to solve both the velocity regression problem and the pressure computation. This approach is akin to the well-known Kansa method [@Fornberg2015] for the meshless integration of PDEs. The main novelty is that this formulation yields linear regression problems that can be easily constrained (rather than penalized) and solved using standard linear system solvers. All the codes developed have now been released in the open SPICY (Super Resolution and Pressure from Image Velocimetry) toolbox linked to this contribution. Documentation, installation, and tutorials are available in the provided repository and on a [Youtube channel](https://www.youtube.com/watch?v=ED3x00H4yN4&list=PLEJZLD0-4PeKW6Ze984q08bNz28GTntkR). 
 
 
-1 - Reduced Order Modeling in a nutshell 
-2 - Specify each technique (just matrices differences and physical interpretation)
+# Tutorials and ongoing works
+A total of five tutorials have been published in the repository, allowing for reproducing the results in [@Sperotto2022]. The first tutorial presents the use of SPICY for solving the Laplace Equation in 2D while tutorials two and three focus on the velocity regression and pressure computation on 2D velocity fields with or without the divergence free constraints. Finally, tutorial four tackles a 3D case, namely the Stokes flow past a sphere. The solver currently implemented is a small variant of the direct approach proposed in the original publication. Ongoing works are the extension to Reynolds average formulation to treat turbulent flows, as presented in [@Sperotto2022b] and the implementation of a Partition of Unity (PUM) approach to limit the memory usage as in [@Ratz2022a].
 
 
+# Acknowledgments
+The development of SPICY has been carried out in the framework of the Research Master program of Pietro Sperotto (AY 2021/2022) and Manuel Ratz (AY 2022/2023) at the von Karman Institute.
 
-`Gala` is an Astropy-affiliated Python package for galactic dynamics. Python
-enables wrapping low-level languages (e.g., C) for speed without losing
-flexibility or ease-of-use in the user-interface. The API for `Gala` was
-designed to provide a class-based and user-friendly interface to fast (C or
-Cython-optimized) implementations of common operations such as gravitational
-potential and force evaluation, orbit integration, dynamical transformations,
-and chaos indicators for nonlinear dynamics. `Gala` also relies heavily on and
-interfaces well with the implementations of physical units and astronomical
-coordinate systems in the `Astropy` package [@astropy] (`astropy.units` and
-`astropy.coordinates`).
-
-
-# Mathematics
-
-Single dollars ($) are required for inline mathematics e.g. $f(x) = e^{\pi/x}$
-
-Double dollars make self-standing equations:
-
-$$\Theta(x) = \left\{\begin{array}{l}
-0\textrm{ if } x < 0\cr
-1\textrm{ else}
-\end{array}\right.$$
-
-You can also use plain \LaTeX for equations
-\begin{equation}\label{eq:fourier}
-\hat f(\omega) = \int_{-\infty}^{\infty} f(x) e^{i\omega x} dx
-\end{equation}
-and refer to \autoref{eq:fourier} from text.
-
-# Citations
-
-Citations to entries in paper.bib should be in
-[rMarkdown](http://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html)
-format.
-
-If you want to cite a software repository URL (e.g. something on GitHub without a preferred
-citation) then you can do it with the example BibTeX entry below for @fidgit.
-
-For a quick reference, the following citation commands can be used:
-- `@author:2001`  ->  "Author et al. (2001)"
-- `[@author:2001]` -> "(Author et al., 2001)"
-- `[@author1:2001; @author2:2001]` -> "(Author1 et al., 2001; Author2 et al., 2002)"
-
-# Figures
-
-Figures can be included like this:
-![Caption for example figure.\label{fig:example}](figure.png)
-and referenced from text using \autoref{fig:example}.
-
-Figure sizes can be customized by adding an optional second parameter:
-![Caption for example figure.](figure.png){ width=20% }
-
-# Acknowledgements
-
-We acknowledge contributions from Brigitta Sipocz, Syrtis Major, and Semyeong
-Oh, and support from Kathryn Johnston during the genesis of this project.
 
 # References
