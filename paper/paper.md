@@ -11,7 +11,7 @@ authors:
   - name: Pietro Sperotto
     orcid: 0000-0000-0000-0000
     equal-contrib: true
-    affiliation: "1, 2" # (Multiple affiliations must be quoted)
+    affiliation: 1 # (Multiple affiliations must be quoted)
   - name: M. Ratz
     equal-contrib: true # (This is how you can denote equal contributions between multiple authors)
     orcid: 0000-0000-0000-0000
@@ -24,8 +24,6 @@ authors:
 affiliations:
  - name: the von Karman Institute for Fluid Dynamics (VKI), Rhode St. Genese, 1640, Belgium
    index: 1
- - name: Currently at Dantec Dynamics
-   index: 2
 
 date: 3 May 2023
 bibliography: paper.bib
