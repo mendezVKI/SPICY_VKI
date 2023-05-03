@@ -1,32 +1,30 @@
 ---
-title: 'TESTING MD Connection'
+title: 'SPICY: a Python toolbox for meshless assimilation from image velocimetry using Radial Basis Functions'
 tags:
   - Python
-  - reduced order modeling (ROM)
-  - fluid dynamics
-  - POD
-  - DFT
-  - mPOD
-  - DMD
+  - Radial Basis Functions
+  - Poisson Equation
+  - Super resolution
+  - Data Assimilation in Image Velocimetry
+
 authors:
-  - name: L. Schena
+  - name: Pietro Sperotto
     orcid: 0000-0000-0000-0000
     equal-contrib: true
     affiliation: "1, 2" # (Multiple affiliations must be quoted)
-  - name: D. Ninni
+  - name: M. Ratz
     equal-contrib: true # (This is how you can denote equal contributions between multiple authors)
-    affiliation: 2
+    affiliation: 1
   - name: M. A. Mendez
     corresponding: true # (This is how to denote the corresponding author)
     affiliation: 3
 affiliations:
- - name: the Von Karman Institute for Fluid Dynamics (VKI), Rhode St. Genese, 1640, Belgium
+ - name: the von Karman Institute for Fluid Dynamics (VKI), Rhode St. Genese, 1640, Belgium
    index: 1
- - name: the Von Karman Institute for Fluid Dynamics (VKI), Rhode St. Genese, 1640, Belgium
-   index: 2
- - name: the Von Karman Institute for Fluid Dynamics (VKI), Rhode St. Genese, 1640, Belgium
-   index: 3
-date: 31 October 2022
+ - #name: the Von Karman Institute for Fluid Dynamics (VKI), Rhode St. Genese, 1640, Belgium
+   #index: 2
+
+date: 3 May 2023
 bibliography: paper.bib
 
 # Optional fields if submitting to a AAS journal too, see this blog post:
@@ -37,7 +35,8 @@ bibliography: paper.bib
 
 # Summary
 
-Identifying the underlying patterns in a given data-set is a key enabler to a variety of ends, from data compression, pattern recognition and reduced order modeling (ROM). This is especially true in fields dealing with extensive amount of data, such as fluid mechanics. `MODULO` gathers together several data reduction techniques, namely: Discrete Fourier Transform (DFT), Proper Orthogonal Decomposition (POD), Multiscale Proper Orthogonal Decomposition (mPOD) and Dynamic Mode Decomposition (DMD). These are wrapped in a Python API which guarantee ease of use and consistent syntax across the different methods, allowing then their application and comparison to a given dataset provided by the user. Moreover, as these methods imply the expensive computation of dot products with potentially large, not sparse, matrices, a memory saving option comes into play helping circumvent this problem. 
+This work presents our `SPICY' (meshlesS Pressure from Image veloCimetrY) toolbox for meshless data assimilation in image velocimetry. The proposed approach allows for computing an analytic representation of velocity and pressure fields from noisy and sparse fields, regardless of whether these are acquired using cross-correlation or particle tracking algorithms. SPICY uses penalized and constrained Radial Basis Functions (RBFs), allowing for enforcing physical priors (e.g., divergence-free in incompressible flows) or boundary conditions (e.g., no slip). The resulting analytic expression allows for super-resolution on arbitrary points and accurate computation of derivatives. These could be used to compute derived quantities (e.g., vorticity) and integrate the pressure Poisson equation to compute pressure fields in the case of incompressible flows.
+A set of video tutorials on how to use SPICY is made available on [This is an external link to genome.gov](https://www.genome.gov/)
 
 # Statement of need
 
