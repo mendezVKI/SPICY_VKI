@@ -43,16 +43,24 @@ U = data['vx'].reshape(-1); V = data['vy'].reshape(-1); P = data['p'].reshape(-1
 # Here, we remove the points at the inlet and at the wall, as they are given by the constraints
 inlet_and_wall_remover = np.invert(np.logical_or(np.logical_and(U==0, V==0), X==0))
 # Remove the points
-X = X[inlet_and_wall_remover]; Y = Y[inlet_and_wall_remover]; P = P[inlet_and_wall_remover]
-U = U[inlet_and_wall_remover]; V = V[inlet_and_wall_remover]
+X_p = X[inlet_and_wall_remover]; Y_p = Y[inlet_and_wall_remover]; P_p = P[inlet_and_wall_remover]
+U_p = U[inlet_and_wall_remover]; V_p = V[inlet_and_wall_remover]
 
-# From the remaining points we can choose to sample a random amount if we want to go for a smaller test case. In this
-# tutorial, we take the maximum number of points which is 18755
-n_p = 18755
-random_points_indices = np.random.randint(low=0, high=len(X), size=n_p)
+# From the remaining points we can choose to sample a random amount of points
+# if we want to go for a smaller test case. In this
+# tutorial, we take a maximum of 18755 points. We will use 70% of these and 
+# keep 20% to evaluate the RBF prediction performances in out of sample conditions
+
+
+# A testing data, we take the ones that are not in this list.
+from sklearn.model_selection import train_test_split
+indices_train, indices_test=train_test_split(np.arange(0,len(X_p),1),test_size=0.2)
+
+n_p = len(indices_train)
+
 # Select the data points
-X = X[random_points_indices]; Y = Y[random_points_indices]; P = P[random_points_indices]
-U = U[random_points_indices]; V = V[random_points_indices]
+X = X_p[indices_train]; Y = Y_p[indices_train]; P = P_p[indices_train]
+U = U_p[indices_train]; V = V_p[indices_train]
 
 # Add 0.3 noise to the velocity field
 q = 0.05
@@ -62,8 +70,6 @@ V_noise = V * (1 + q * np.random.uniform(-1, 1, size = V.shape))
 
 # Get indices of the points
 indices=np.linspace(0,len(X)-1,len(X))
-
-
 
 
 #%% 2. Define all the BC's for constraints
@@ -150,7 +156,7 @@ List_Poly=[poly1,poly2,[],[]] # the third scale acts on the full domain
 # Prepare the SPICY object
 SP_vel = spicy([U_noise,V_noise], [X,Y], basis='gauss')
 # Clustering 
-SP_vel.clustering([3,6,50,200], Areas=List_Poly, r_mM=[0.015,0.3], eps_l=0.83)
+SP_vel.clustering([3,6,50,200], Areas=List_Poly, r_mM=[0.015,0.3], eps_l=0.87)
 # Introduce the Constraints
 SP_vel.vector_constraints(DIR=DIR, DIV=DIV, extra_RBF=True)
 # Plot the RBF cluster
@@ -174,9 +180,42 @@ error_u = np.linalg.norm(U_calc - U) / np.linalg.norm(U)
 # Error in v
 error_v = np.linalg.norm(V_calc - V) / np.linalg.norm(V)
 
+print('------- In-sample error results ---------')
 print('Total velocity error: {0:.3f}%'.format(error_magn*100))
 print('Velocity error in u:  {0:.3f}%'.format(error_u*100))
 print('Velocity error in v:  {0:.3f}%'.format(error_v*100))
+
+# we now check the out-of sample results.
+# Get out of sample position
+U_out=U_p[indices_test];  V_out=V_p[indices_test]
+X_out=X_p[indices_test];  Y_out=Y_p[indices_test]
+
+# Out of sample predictions
+U_calc_O,V_calc_O=SP_vel.Get_Sol([X_out,Y_out])
+
+
+# Magnitude of the RBF solution
+U_magn_calc_O = np.sqrt(U_calc_O**2 + V_calc_O**2)
+# Compute the magnitude of the analytical solution
+U_magn_O = np.sqrt(U_out**2 + V_out**2)
+# Compute the error in the magnitude
+error_magn_O = np.linalg.norm(U_magn_calc_O - U_magn_O)/np.linalg.norm(U_magn_O)
+# Error in u
+error_u_O = np.linalg.norm(U_calc_O - U_out) / np.linalg.norm(U_out)
+# Error in v
+error_v_O = np.linalg.norm(V_calc_O - V_out) / np.linalg.norm(V_out)
+
+
+print('------- Out of sample error results ---------')
+print('Total velocity error: {0:.3f}%'.format(error_magn_O*100))
+print('Velocity error in u:  {0:.3f}%'.format(error_u_O*100))
+print('Velocity error in v:  {0:.3f}%'.format(error_v_O*100))
+
+
+
+
+
+
 
 
 #%% Plot the results
@@ -211,7 +250,7 @@ fig.tight_layout()
 source_term = SP_vel.Evaluate_Source_Term(grid=[X,Y], rho=rho)
 
 # Number of constraints on each boundary
-n_c = 200
+n_c = 100
 
 # We start with the Neumann conditions
 # Left boundary
@@ -224,7 +263,7 @@ Y_Pres_N2 = np.zeros(n_c)
 X_Pres_N4 = np.linspace(0, L, n_c)
 Y_Pres_N4 = np.ones(n_c)*H
 # Cylinder boundary
-alpha_P = np.linspace(0, 2*np.pi, 5*n_c, endpoint = False) 
+alpha_P = np.linspace(0, 2*np.pi, n_c, endpoint = False) 
 X_Pres_N5 = 0.2 + R*np.cos(alpha_P)
 Y_Pres_N5 = 0.2 + R*np.sin(alpha_P)
 # Assemble the the entire array of Neumann points
@@ -292,7 +331,7 @@ P_Pres_D = np.hstack([np.zeros(X_Pres_D3.shape),P_S])
 List_Poly=[poly1,poly2,[],[],[]]
 
 SP_pres = spicy([source_term], [X,Y], basis='gauss')
-SP_pres.clustering([3,10,50,200,1000], Areas=List_Poly, r_mM=[0.015,0.4], eps_l=0.87)
+SP_pres.clustering([3,10,50,200,1000], Areas=List_Poly, r_mM=[0.015,0.5], eps_l=0.87)
 
 # We assemble our Neumann and Dirichlet B.C.
 NEU_P = [X_Pres_N, Y_Pres_N, n_x, n_y, P_Neu]

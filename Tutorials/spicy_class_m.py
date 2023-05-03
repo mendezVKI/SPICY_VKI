@@ -1620,7 +1620,7 @@ class spicy:
             
             # Step 1: Regularize the matrix A
             lambda_A = eigsh(self.A, 1, return_eigenvectors=False) # Largest eigenvalue
-            alpha = lambda_A / K_cond
+            alpha = (lambda_A-K_cond*2.2e-16) / K_cond
             self.A = self.A + alpha*np.eye(np.shape(self.A)[0])
             print('Matrix A regularized')
             
@@ -1635,8 +1635,8 @@ class spicy:
             print('Solving with constraints')
             
             # Step 1: Regularize the matrix A
-            lambda_M = eigsh(self.A, 1, return_eigenvectors=False) # Largest eigenvalue
-            alpha = lambda_M / K_cond
+            lambda_A = eigsh(self.A, 1, return_eigenvectors=False) # Largest eigenvalue
+            alpha = (lambda_A-K_cond*2.2e-16) / K_cond
             self.A = self.A + alpha*np.eye(np.shape(self.A)[0])
             print('Matrix A regularized')
             
@@ -1657,7 +1657,7 @@ class spicy:
             except:
                 # if it does not work, regularize M the same way as for A
                 lambda_M = eigsh(M, 1, return_eigenvectors=False) # Largest eigenvalue
-                alpha = lambda_M / K_cond
+                alpha = (lambda_M-K_cond*2.2e-16) / K_cond
                 M = M + alpha*np.eye(np.shape(M)[0])
                 L_M, low = linalg.cho_factor(M, overwrite_a = True, check_finite = False, lower = True)
                 print('Chol factor of M WITH regularization')             
