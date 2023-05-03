@@ -14,7 +14,7 @@ authors:
     affiliation: 1 # (Multiple affiliations must be quoted)
   - name: M. Ratz
     equal-contrib: true # (This is how you can denote equal contributions between multiple authors)
-    orcid: 0000-0000-0000-0000
+    orcid: 0009-0008-8491-8367
     affiliation: 1
   - name: M. A. Mendez
     orcid: 0000-0002-1115-2187
@@ -53,7 +53,7 @@ A total of five tutorials have been published in the repository, allowing for re
 
 
 # Acknowledgments
-The development of SPICY has been carried out in the framework of the Research Master program of Pietro Sperotto (AY 2021/2022) and Manuel Ratz (AY 2022/2023) at the von Karman Institute.
+The development of SPICY has been carried out in the framework of the Research Master program of Pietro Sperotto (AY 2021/2022) and Manuel Ratz (AY 2022/2023) at the von Karman Institute. 
 
 
 # References
