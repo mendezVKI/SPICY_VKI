@@ -17,12 +17,12 @@ authors:
     affiliation: 1
   - name: M. A. Mendez
     corresponding: true # (This is how to denote the corresponding author)
-    affiliation: 3
+    affiliation: 1
 affiliations:
  - name: the von Karman Institute for Fluid Dynamics (VKI), Rhode St. Genese, 1640, Belgium
    index: 1
- - #name: the Von Karman Institute for Fluid Dynamics (VKI), Rhode St. Genese, 1640, Belgium
-   #index: 2
+ - name: Currently at Dantec Dynamics
+   index: 2
 
 date: 3 May 2023
 bibliography: paper.bib
