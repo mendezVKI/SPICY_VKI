@@ -45,12 +45,8 @@ plt.colorbar(P)
 
 
 #%% We use the RBF regression
-SP = spicy([np.zeros(X.shape)], [X,Y], basis='c4')
 
-SP.clustering([6,50], r_mM=[0.01,0.7], eps_l=0.88)
-
-
-
+# Define the boundary conditions
 # Number of points for the vertical and horizontal boundary
 n_c_V = n_c_H = 10
 
@@ -79,13 +75,13 @@ U_Dir = np.concatenate((U_Dir1, U_Dir2, U_Dir3, U_Dir4))
 DIR = [X_Dir, Y_Dir, U_Dir]
 
 # We set the constraints in these points and also place additional RBFs in each of these points
+SP = spicy([np.zeros(X.shape)], [X,Y], basis='c4')
+SP.clustering([6,50], Areas=[[],[]], r_mM=[0.01,0.7], eps_l=0.88)
 SP.scalar_constraints(DIR=DIR, extra_RBF=True)
 
 # Plot the RBFs and the clusters
+SP.plot_RBFs(l=0)
 SP.plot_RBFs(l=1)
-
-SP.plot_RBFs(l=2)
-
 
 
 # Assembly Solver
@@ -130,8 +126,8 @@ v_T=-2*Yg
 u_C,v_C=SP.Get_first_Derivatives([Xg.reshape(-1),
                                   Yg.reshape(-1)])    
 
-
-plt.quiver(Xg,Yg,u_T,v_T)
+plt.figure()
+plt.quiver(Xg,Yg,u_T,v_T,color='blue')
 
 plt.quiver(Xg.reshape(-1),Yg.reshape(-1),
            u_C,v_C,color='red')

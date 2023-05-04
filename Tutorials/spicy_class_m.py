@@ -289,7 +289,7 @@ class spicy:
             print(str(len(X_C))+' RBFs placed')
             # For plotting purposes, we keep track of the scale at which
             # the RBF have been places
-            self.list=l_list
+            self.Clust_list=l_list
             
             
         
@@ -849,9 +849,9 @@ class spicy:
             try:  
                 
                 # We define the data that will be influded
-                X_Plot=self.X_C[np.argwhere(self.list==l)]
-                Y_Plot=self.Y_C[np.argwhere(self.list==l)]
-                d_K_Plot=self.d_k[np.argwhere(self.list==l)]
+                X_Plot=self.X_C[np.argwhere(self.Clust_list==l)]
+                Y_Plot=self.Y_C[np.argwhere(self.Clust_list==l)]
+                d_K_Plot=self.d_k[np.argwhere(self.Clust_list==l)]
                 
                 fig, axs = plt.subplots(1, 2, figsize = (7, 3.5), dpi = 100)
 

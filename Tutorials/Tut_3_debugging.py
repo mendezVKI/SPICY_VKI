@@ -48,7 +48,7 @@ U_p = U[inlet_and_wall_remover]; V_p = V[inlet_and_wall_remover]
 
 # From the remaining points we can choose to sample a random amount of points
 # if we want to go for a smaller test case. In this
-# tutorial, we take a maximum of 18755 points. We will use 70% of these and 
+# tutorial, we take a maximum of 18755 points. We will use 80% of these and 
 # keep 20% to evaluate the RBF prediction performances in out of sample conditions
 
 
@@ -56,9 +56,9 @@ U_p = U[inlet_and_wall_remover]; V_p = V[inlet_and_wall_remover]
 from sklearn.model_selection import train_test_split
 indices_train, indices_test=train_test_split(np.arange(0,len(X_p),1),test_size=0.2)
 
-n_p = len(indices_train)
+n_p = len(indices_train) # This is the number of data points that will be used for training
 
-# Select the data points
+# Select the data points that will be used for  training 
 X = X_p[indices_train]; Y = Y_p[indices_train]; P = P_p[indices_train]
 U = U_p[indices_train]; V = V_p[indices_train]
 
@@ -66,6 +66,12 @@ U = U_p[indices_train]; V = V_p[indices_train]
 q = 0.05
 U_noise = U * (1 + q * np.random.uniform(-1, 1, size = U.shape))
 V_noise = V * (1 + q * np.random.uniform(-1, 1, size = V.shape))
+
+
+# Let's have a look at the velocity data:
+fig=plt.figure()
+plt.scatter(X,Y,c=np.sqrt(U**2+V**2))
+plt.gca().set_aspect(1)
 
 
 # Get indices of the points
@@ -96,7 +102,7 @@ Y_Div4 = np.ones(n_c)*H
 U_Dir4 = np.zeros(X_Div4.shape)
 V_Dir4 = np.zeros(X_Div4.shape)
 # Cylinder boundary
-alphaT = np.linspace(0, 2*np.pi, 20*n_c, endpoint = False)
+alphaT = np.linspace(0, 2*np.pi, n_c, endpoint = False)
 X_Div5 = 0.2+R*np.cos(alphaT)
 Y_Div5 = 0.2+R*np.sin(alphaT)
 U_Dir5 = np.zeros(X_Div5.shape)
@@ -138,29 +144,39 @@ p3 = geometry.Point(0.3,0.3); p4 = geometry.Point(0.1,0.3)
 pointList = [p1, p2, p3, p4]
 poly1 = geometry.Polygon([i for i in pointList])
 
-plt.scatter(X,Y,c=P)
-plt.plot(*poly1.exterior.xy,'r') # in case you want to see them for info
 
 # Define also a second box
-p1 = geometry.Point(0.0,0); p2 = geometry.Point(0.5,0)
-p3 = geometry.Point(0.5,0.45); p4 = geometry.Point(0.0,0.45)
+p1 = geometry.Point(0.0,0); p2 = geometry.Point(0.45,0)
+p3 = geometry.Point(0.45,0.45); p4 = geometry.Point(0.0,0.45)
 
 pointList = [p1, p2, p3, p4]
 poly2 = geometry.Polygon([i for i in pointList])
 
-plt.plot(*poly2.exterior.xy,'r') # in case you want to see them for info
-
-List_Poly=[poly1,poly2,[],[]] # the third scale acts on the full domain
 
 
-# Prepare the SPICY object
+# Plot the boxes with the velocity field
+fig=plt.figure()
+plt.quiver(X,Y,U,V)
+plt.gca().set_aspect(1)
+plt.plot(*poly2.exterior.xy,'b') # in case you want to see them for info
+plt.plot(*poly1.exterior.xy,'r') # in case you want to see them for info
+
+
+
+# List_Poly=[poly1,poly2,[],[]] # the third scale acts on the full domain
 SP_vel = spicy([U_noise,V_noise], [X,Y], basis='gauss')
 # Clustering 
-SP_vel.clustering([3,6,50,200], Areas=List_Poly, r_mM=[0.015,0.3], eps_l=0.87)
+SP_vel.clustering([3,6,50,200], Areas=[poly1,poly2,[],[]], r_mM=[0.015,0.3], eps_l=0.87)
 # Introduce the Constraints
 SP_vel.vector_constraints(DIR=DIR, DIV=DIV, extra_RBF=True)
 # Plot the RBF cluster
+SP_vel.plot_RBFs(l=0)
+SP_vel.plot_RBFs(l=1)
+SP_vel.plot_RBFs(l=2)
 SP_vel.plot_RBFs(l=3)
+
+
+
 # Assembly the system
 SP_vel.Assembly_Regression(alpha_div=1) 
 # Solve the system
@@ -193,7 +209,6 @@ X_out=X_p[indices_test];  Y_out=Y_p[indices_test]
 # Out of sample predictions
 U_calc_O,V_calc_O=SP_vel.Get_Sol([X_out,Y_out])
 
-
 # Magnitude of the RBF solution
 U_magn_calc_O = np.sqrt(U_calc_O**2 + V_calc_O**2)
 # Compute the magnitude of the analytical solution
@@ -210,12 +225,6 @@ print('------- Out of sample error results ---------')
 print('Total velocity error: {0:.3f}%'.format(error_magn_O*100))
 print('Velocity error in u:  {0:.3f}%'.format(error_u_O*100))
 print('Velocity error in v:  {0:.3f}%'.format(error_v_O*100))
-
-
-
-
-
-
 
 
 #%% Plot the results
@@ -247,7 +256,6 @@ fig.tight_layout()
 
 
 #%% Pressure Computation
-source_term = SP_vel.Evaluate_Source_Term(grid=[X,Y], rho=rho)
 
 # Number of constraints on each boundary
 n_c = 100
@@ -295,34 +303,44 @@ Y_Pres_N = Y_Pres_N[valid_idcs]
 n_x = n_x[valid_idcs]
 n_y = n_y[valid_idcs]
 
+
+
+
 # The last thing are the Dirichlet conditions at the outlet
 # Right boundary
 X_Pres_D3 = np.ones(n_c-2)*L
 Y_Pres_D3 = np.linspace(0, H, n_c)[1:-1]
-
-# or we add just one pressure prob at the inlet:
-#X_Pres_D3=
-#Y_Pres_D3=    
     
     
-
 # We also assume that we have 1 pressure tap somewhere
-X_S=X[6991]
-Y_S=Y[6991]
-P_S=P[6991]
+x_loc=0.4; y_loc=0.2
+x_err=(X_p-x_loc)**2+(Y_p-y_loc)**2
+index_probe=np.argmin(x_err)
 
+# Define the Dirichlet condition associated to the probe.
+X_S=X_p[index_probe]
+Y_S=Y_p[index_probe]
+P_S=P_p[index_probe]
+
+X_Pres_D = np.append(X_Pres_D3,X_S)
+Y_Pres_D = np.append(Y_Pres_D3,Y_S)
+P_Pres_D = np.hstack([np.zeros(X_Pres_D3.shape),P_S])
 
 #%% Proceed with the integration 
 
 # Evaluate the Neumann conditions in these points
+
+source_term = SP_vel.Evaluate_Source_Term(grid=[X,Y], rho=rho)
+
 P_Neu = SP_vel.Get_Pressure_Neumann(grid = [X_Pres_N, Y_Pres_N], 
                                     normals = [n_x, n_y],
                                     rho = rho, mu = mu)
 
 # The Dirichlet conditions do not have any overlap with the Neumann conditions, so we can just take them as they are
-X_Pres_D = np.append(X_Pres_D3,X_S)
-Y_Pres_D = np.append(Y_Pres_D3,Y_S)
-P_Pres_D = np.hstack([np.zeros(X_Pres_D3.shape),P_S])
+
+# We assemble our Neumann and Dirichlet B.C.
+NEU_P = [X_Pres_N, Y_Pres_N, n_x, n_y, P_Neu]
+DIR_P = [X_Pres_D, Y_Pres_D, P_Pres_D]
 
 # X_Pres_D = X_Pres_D3
 # Y_Pres_D = Y_Pres_D3
@@ -333,9 +351,6 @@ List_Poly=[poly1,poly2,[],[],[]]
 SP_pres = spicy([source_term], [X,Y], basis='gauss')
 SP_pres.clustering([3,10,50,200,1000], Areas=List_Poly, r_mM=[0.015,0.5], eps_l=0.87)
 
-# We assemble our Neumann and Dirichlet B.C.
-NEU_P = [X_Pres_N, Y_Pres_N, n_x, n_y, P_Neu]
-DIR_P = [X_Pres_D, Y_Pres_D, P_Pres_D]
 
 # And, we set them
 SP_pres.scalar_constraints(DIR=DIR_P, 
@@ -344,25 +359,37 @@ SP_pres.scalar_constraints(DIR=DIR_P,
 
 SP_pres.plot_RBFs(l=4)
 
+SP_pres.Assembly_Poisson() # Assembly the system
 
-SP_pres.Assembly_Poisson(n_hb = 0)
-SP_pres.Solve(K_cond=1e7)
+SP_pres.Solve(K_cond=1e9)
+
+
+# Check the results on the 'training data'
 P_calc = SP_pres.Get_Sol(grid=[X,Y])
 # print the pressure error
 error_p = np.linalg.norm(P_calc-P)/np.linalg.norm(P)
+print('------- in sample pressure error results ---------')
 print('Total pressure error: {0:.3f}%'.format(error_p*100))
+
+# Check the results on the 'testing data'
+P_calc = SP_pres.Get_Sol(grid=[X[],Y])
+
+
+
+
 
 
 fig, axes = plt.subplots(nrows=3, dpi=100)
 axes[0].set_title('Original Pressure')
 sc=axes[0].scatter(X, Y, c=P)
-plt.colorbar(sc)
+plt.colorbar(sc,ax=axes[0])
+axes[0].plot(X_S,Y_S,'ro')
 axes[1].set_title('Reconstructed Pressure')
 sc2=axes[1].scatter(X, Y, c=P_calc)
-plt.colorbar(sc2)
+plt.colorbar(sc2,ax=axes[1])
 axes[2].set_title('Difference')
 sc3=axes[2].scatter(X, Y, c=P_calc-P)
-plt.colorbar(sc3)
+plt.colorbar(sc3,ax=axes[2])
 
 
 for ax in axes.flatten():
