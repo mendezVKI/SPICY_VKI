@@ -1,0 +1,10 @@
+=================================
+SPICY: Test chapter
+=================================
+
+.. image:: spicy_logo.png
+  :width: 700
+  :align: center
+  :alt: Alternative text
+  
+This is just a test chapter.

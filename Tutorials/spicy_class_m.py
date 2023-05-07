@@ -32,100 +32,90 @@ from shapely import geometry
 
     
 class spicy:
+    """
+    SPICY (Super-resolution and Pressure from Image veloCimetrY) is a software 
+    developed at the von Karman Institute to perform data assimilation by means 
+    of Radial Basis Functions (RBF). The framwork works both for structured and 
+    unstructered data. Currently, the main application is to perform a regression
+    of image velocimetry data and then solve the pressure poisson equation but 
+    it can be readily extended to fields such as the regression of temperature fields.
+    
+    The original article by Sperotto et al. (2022) can be found at:
+    https://arxiv.org/abs/2112.12752
+    
+    YouTube channel with hands-on tutorials can be found at:
+    """    
     # 1. Initialize the class with the data
     def __init__(self, data, grid_point, basis='gauss', ST=None):
         """
-        Initialization of an instance of the spicy class.
-             
-        # The input parameters are 
-        ------------------------------------------------------------------------
-        Parameters
-        ------------------------------------------------------------------------
-        :param model: string
+        Initialization of an instance of the spicy class. 
+        
+        :type model: str
+        :param model: 
             This defines the model. Currently, SPICY supports 4 models:
-                1. 'scalar', to regress a scalar quantity.
-                    This is implemented both in 2D and 3D.
-                2. 'laminar', to regress the velocity field without turbulence modeling.
-                    This is implemented both in 2D and 3D.
-                3. 'RANSI', to regress a velocity field with a RANS model assuming isotropic Reynolds stresses (hence mean(u'**2)) is the only extra expected quantity.
-                    This must be provided as the fourth entry of 'data', which becomes [u,v,w,uu].
-                    NOTE: Currently, RANSI is only implemented in 3D.
-                4. 'RANSA', to regress a velocity field with a RANS model without assuming isotropic Reynolds stresses.
-                    this becomes [uu, vv, uv] in 2D and [uu, vv, ww, uv, uw, vw] in 3D.
-                    NOTE: Currently, RANSA is only implemented in 3D.                            
-        
-        :param data: list
+                                          
+        :type data: list of 1D numpy.ndarray
+        :param data:
             If the instance is to be used to solve a regression problem, this 
-            list contains the target data.
-            This is an array [u] if the model is scalar,
-            two arrays [u, v] for a 2D vector field and [u, v, w] for a 3D field.
-            If the instance is to be used to solve the Poisson equation, this list contains
-            the forcing term on the RHS of the Poisson equation.
+            list contains the target data. This is an array [u] if the model is
+            scalar, two arrays [u, v] for a 2D vector field and [u, v, w] for a 
+            3D field. If the instance is to be used to solve the Poisson equation,
+            this list contains the forcing term on the RHS of the Poisson equation.
                     
-        :param grid_point: list
-            Is a list of arrays containing the grid point [X_G ,Y_G] in 2D and [X_G, Y_G, Z_G] in 3D.   
-                    
-        :param basis: string
-            This defines the basis. Currently, the two options are:
-             1. 'gauss', i.e. Gaussian RBFs exp(-c_r**2*d(x))
-             2. 'c4', i.e. C4 RBFs (1+d(x+)/c_r)**5(1-d(x+)/c_r)**5
+        :type grid point: list of 1D numpy.ndarray
+        :param grid_point: 
+            Is a list of arrays containing the grid point [X_G ,Y_G] in 2D and
+            [X_G, Y_G, Z_G] in 3D.   
+               
+        :type basis: str     
+        :param basis: This defines the basis. Currently, the two options are
         
-        :param ST: list
+           - ``'gauss'``, i.e. Gaussian RBFs exp(-c_r**2*d(x)) 
+           - ``'c4'``, i.e. C4 RBFs (1+d(x+)/c_r)**5(1-d(x+)/c_r)**5
+        
+        :type ST: list of 1D numpy.ndarray
+        :param ST: 
             Is a list of arrays collecting Reynolds stresses. This is empty if
-            the model is 'scalar' or 'laminar'.
-            If the model is RANSI, it contains [uu']. 
-            If the model is RANSA, it contains [uu, vv, uv] in 2D and 
-              [uu, vv, ww, uv, uw, vw] in 3D.                                                   
-                            
-        ------------------------------------------------------------------------
-        Other attributes
-        ------------------------------------------------------------------------
-        
+            the model is 'scalar' or 'laminar'. If the model is RANSI, it
+            contains [uu']. If the model is RANSA, it contains [uu, vv, uv] 
+            in 2D and [uu, vv, ww, uv, uw, vw] in 3D.                           
+                                   
         General attributes:
-        
-        X_G, Y_G, Z_G: coordinates of the point in which the data is available
-        u : function to learn or u component in case of velocity field
-        v: v component in case of velocity field (absent for scalar)
-        w: w component in case of velocity field (absent for scalar)
+            X_G, Y_G, Z_G: coordinates of the point in which the data is available
+            u : function to learn or u component in case of velocity field
+            v: v component in case of velocity field (absent for scalar)
+            w: w component in case of velocity field (absent for scalar)
         
         If constraints are assigned:
+            X_D, Y_D, Z_D: coordinates of the points with D conditions
+            c_D: values of the D conditions
             
-        X_D, Y_D, Z_D: coordinates of the points with D conditions
-        c_D: values of the D conditions
-        
-        X_N,Y_N,Z_N: coordinates of the points with N conditions
-        n_x,n_y,n_z: normal versors where N conditions are introduced
-        c_N_X, c_N_Y, c_N_z: values of the N conditions
-        
-        X_Div, Y_Div, Z_Div: coordinates of the points with Div conditions
+            X_N, Y_N, Z_N: coordinates of the points with N conditions
+            n_x, n_y, n_z: normal versors where N conditions are introduced
+            c_N_X, c_N_Y, c_N_Z: values of the N conditions
+            
+            X_Div, Y_Div, Z_Div: coordinates of the points with Div conditions
                 
         If clustering is done:
-            
-        r_mM: vector collecting minimum (m) and maximum (M) radious of the RBFs 
-        eps_l: scalar controlling the value of an RBF at the closest RBF neighbor               
-        X_C,Y_C,Z_C : coordinates of the cluster centers/collocations 
-        c_k: shape parameters of the RBFs 
-        d_k: diameters of the rbfs  
+            r_mM: vector collecting minimum (m) and maximum (M) radious of the RBFs 
+            eps_l: scalar controlling the value of an RBF at the closest RBF neighbor               
+            X_C, Y_C, Z_C : coordinates of the cluster centers/collocations 
+            c_k: shape parameters of the RBFs 
+            d_k: diameters of the rbfs  
        
         If problem is assembled:
-        
-        A: matrix A in the linear system
-        B: matrix B in the linear system
-        b_1: vector b_1 in the linear systems
-        b_2: vector b_2 in the linear system       
+            A: matrix A in the linear system
+            B: matrix B in the linear system
+            b_1: vector b_1 in the linear systems
+            b_2: vector b_2 in the linear system       
         
         If computation is done: 
-            
-        weights: weights of the RBF regression 
-        lambda: Lagrange multipliers of the RBF regression  
+            weights: weights of the RBF regression 
+            lambda: Lagrange multipliers of the RBF regression  
         
         RSI: Reynolds stress in case of isotropic flow (active for RANSI)
         
         [...] TODO: RANS formulations to be added.
-        
-        ------------------------------------------------------------------------
-        Methods
-        ------------------------------------------------------------------------
         
         """
         
@@ -187,26 +177,28 @@ class spicy:
     # 2. Clustering (this does not depend on the model, but only on the dimension).
     def clustering(self, n_K, Areas, r_mM=[0.01,0.3], eps_l=0.7):
         """
-        This function defines the collocation of a set of RBFs using the multi-level clustering
-        described in the article. The function must be run before the constraint definition.
-         
-        The input parameters are 
-        ------------------------------------------------------------------------
-        Parameters
-        ------------------------------------------------------------------------
-        :param n_K: list
-            This contains the n_k vector in eq 33. if n_K=[4,10], it means that the clustering
-            will try to have a first level with RBFs whose size seeks to embrace 4 points, while the 
-            second level seeks to embrace 10 points, etc.
-            The length of this vector automatically defines the number of levels.
+        This function defines the collocation of a set of RBFs using the multi-
+        level clustering described in the article. The function must be run 
+        before the constraint definition.
+                 
+        :type n_K: list 
+        :param n_K:
+            This contains the n_k vector in eq (33). if n_K=[4,10], it means that 
+            the clustering will try to have a first level with RBFs whose size
+            seeks to embrace 4 points, while the second level seeks to embrace
+            10 points, etc. The length of this vector automatically defines the
+            number of levels.
         
-        :param r_mM: list, default = [0.01, 0.3]
-            This contains the minimum and the maximum RBF's radiuses. This is defined as the distance from the
-            collocation point at which the RBF value is 0.5.
+        :type r_mM: list of two float values
+        :param r_mM: default=[0.01, 0.3].
+            This contains the minimum and the maximum RBF's radiuses. This is
+            defined as the distance from the collocation point at which the RBF
+            value is 0.5.
                 
-        :param eps_l: float, default = 0.7
-            This is the value that a RBF will have at its closest neighbour. It is used to define the shape
-            factor from the clustering results.
+        :type float: float
+        :param eps_l: default=0.7.
+            This is the value that a RBF will have at its closest neighbour. It 
+            is used to define the shape factor from the clustering results.
                    
         """
         
@@ -386,35 +378,33 @@ class spicy:
         """         
         This functions sets the boundary conditions for a scalar problem. The
         function must be run after the clustering was carried out.
-        ------------------------------------------------------------------------
-        Parameters
-        ------------------------------------------------------------------------
-        :param DIR: list
-            This contains the info for the Dirichlet conditions.
-            If the model is 2D, then this has [X_D, Y_D, c_D].
-            If the model is 3D, then this has [X_D, Y_D, Z_D, c_D].
-              
-        Here X_D, Y_D, Z_D are the coordinates of the poins where the value c_D
-        is set.
         
-        :param NEU: list
-            This contains the info for the Neuman conditions.
-            If the model is 2D, then this has [X_N, Y_N, n_x, n_y, c_N].
-            If the model is 3D, then this has [X_N, Y_N, Z_n, n_x, n_y, n_z, c_N].
-                   
-        Here X_N, Y_N, Z_N are the coordinates of the poins where the value c_N
-        is set for the directional derivative along the normal direction n_x, n_y, n_z
-    
-        :param extra_RBF: bool, default = True
+        :type DIR: list of 1D numpy.ndarray
+        :param DIR: 
+            This contains the info for the Dirichlet conditions. If the model is
+            2D, then this has [X_D, Y_D, c_D]. If the model is 3D, then this has
+            [X_D, Y_D, Z_D, c_D]. Here, X_D, Y_D, Z_D are the coordinates of the
+            poins where the value c_D is set.
+        
+        :type NEU: list of 1D numpy.ndarray
+        :param NEU:
+            This contains the info for the Neuman conditions. If the model is 2D,
+            then this has [X_N, Y_N, n_x, n_y, c_N]. If the model is 3D, then 
+            this has [X_N, Y_N, Z_N, n_x, n_y, n_z, c_N]. Here X_N, Y_N, Z_N are
+            the coordinates of the poins where the value c_N is set for the 
+            directional derivative along the normal direction n_x, n_y, n_z.
+        
+        :type extra_RBF: bool
+        :param extra_RBF: default = True
             This is a flag to put extra collocation points where a constraint is
             set. It can improve the solution of the linear system as constraints
-            remove degrees of freedom
+            remove degrees of freedom.
                  
         NOTE: there is no check on the possible (dangerous) overlapping of conditions.
         Therefore, at the moment, one might put both Neuman and Dirichlet conditions
         at the same points. This is of course a terrible idea.
         TODO in future release: if both D and N conditions are given in at the same points
-        (or to close?) then only one of them (e.g. D) is considered
+        (or to close?) then only one of them (e.g. D) is considered.
         """
         
         # Check the input is correct
@@ -580,10 +570,9 @@ class spicy:
         """        
         # This functions sets the boundary conditions for a laminar problem. The
         function must be run after the clustering was carried out.
-        ------------------------------------------------------------------------
-        Parameters
-        ------------------------------------------------------------------------
-        :param DIR: list
+        
+        :type DIR: list of 1D numpy.ndarray
+        :param DIR:
             This contains the info for the Dirichlet conditions.
             If the model is 2D, then this has [X_D, Y_D, c_D_X, c_D_Y].
             If the model is 3D, then this has [X_D, Y_D, Z_D, c_D_X, c_D_Y, c_D_Z].
@@ -591,21 +580,27 @@ class spicy:
             Here X_D, Y_D, Z_D are the coordinates of the poins where the value c_D_X,
             c_D_Y, c_D_Z is set in 2 or 3 dimensions.
         
-        :param NEU: list
+        :type NEU: list of 1D numpy.ndarray
+        :param NEU:
             This contains the info for the Neuman conditions.
             If the model is 2D, then this has [X_N, Y_N, n_x, n_y, c_N_X, c_N_Y].
             If the model is 3D, then this has [X_N, Y_N, Z_n, n_x, n_y, n_z, c_N_X, c_N_Y, c_N_Z].
-                   
+            
             Here X_N, Y_N, Z_N are the coordinates of the poins where the value c_N_X,
             c_N_Y, c_N_Z is set for the directional derivative along the 
             normal direction n_x,n_y,n_z
             
-        :param DIV: list
+        :type DIV: list of 1D numpy.ndarray
+        :param DIV:
             This contains the info for the Divergence free conditions.
             If the model is 2D, then this has [X_Div, Y_Div].
             If the model is 3D, then this has [X_Div, Y_Div, Z_Div].
+            
+            Here X_Div, Y_Div, Z_Div are the coordinates of the poins where the
+            divergence-free condition is imposed.
         
-        :param extra_RBF: bool, default = True
+        :type extra_RBF: bool
+        :param extra_RBF: default=True
             This is a flag to put extra collocation points where a constraint is
             set. It can improve the solution of the linear system as constraints
             remove degrees of freedom
@@ -835,19 +830,14 @@ class spicy:
         Utility function to check the spreading of the RBFs after the clustering.
         No input is required, nothing is assigned to SPICY and no output is generated.
         
-        ------------------------------------------------------------------------
-        Parameters
-        ------------------------------------------------------------------------
-        :param l: integer
+        :type l: int
+        :param l: 
             This defines the cluster level of RBF that will be visualized.
-            
-            
         """
         
         # check if it is 2D or 3D
         if self.type == '2D': # 2D
             try:  
-                
                 # We define the data that will be influded
                 X_Plot=self.X_C[np.argwhere(self.Clust_list==l)]
                 Y_Plot=self.Y_C[np.argwhere(self.Clust_list==l)]
@@ -915,15 +905,11 @@ class spicy:
     # 4.1. Poisson solver
     def Assembly_Poisson(self, n_hb=0):
         """
-        This function assembly the matrices A, B, C, D from the paper.
-        TODO. Currently implemented only for model='scalar'
+        This function assembly the matrices A, B, b_1, b_2 for the Poisson problem.
+        These are eqs. (31a) - (31d).
         
-        #The input parameters are 
-        ------------------------------------------------------------------------
-        Parameters
-        ------------------------------------------------------------------------
-
-        :param n_hb: string (currently not active)
+        :type n_hb: int
+        :param n_hb: 
             When solving the Poisson equation, global basis elements such as polynomials or series
             expansions are of great help. This is evident if one note that the eigenfunctions of 
             the Laplace operator are harmonics. 
@@ -945,14 +931,8 @@ class spicy:
         
         """   
         
-        # assert type(source_terms) == np.ndarray, 'Source terms must be a 1D numpy array'
-        assert type(n_hb) == int, 'Number of harmonic basis must be an integer'
-        # assert len(source_terms.shape) == 1, 'Source terms must be a 1D numpy array'
-        
-        
-        source_terms=self.u
-        
-        
+        assert type(n_hb) == int, 'Number of harmonic basis must be an integer'        
+         
         # Assign the number of harmonic basis functions
         self.n_hb = n_hb
         # get the number of basis and points as we need them a couple of times
@@ -965,12 +945,10 @@ class spicy:
         if self.model=='scalar': 
             if self.type == '2D': # 2D           
                 # get the rescaling factor by normalizing the r.h.s. of the source terms
-                # TODO This should maybe also consider the B.C.?
-                R=max(np.max(source_terms), -np.max(-source_terms))
-                if R == 0:
-                 self.rescale = 1    
-                else:
-                 self.rescale=R 
+                source_terms = self.u
+                self.rescale = max(np.max(source_terms), -np.max(-source_terms))   
+                if np.abs(self.rescale) < 1e-10:
+                    self.rescale = 1
                                       
                 # Approach 1: we build A, B, b1, b2 as in the article from Sperotto
                 L = np.hstack((
@@ -1017,7 +995,6 @@ class spicy:
                 
             elif self.type == '3D': # 3D
                 # get the rescaling factor by normalizing the r.h.s. of the source terms
-                # TODO This should maybe also consider the B.C.?
                 source_terms = self.u
                 self.rescale = max(np.max(source_terms), -np.max(-source_terms))   
                 if np.abs(self.rescale) < 1e-10:
@@ -1091,18 +1068,8 @@ class spicy:
     def Assembly_Regression(self, n_hb=0, alpha_div=None):
         """
         This function assembly the matrices A, B, C, D from the paper.
-        
-        The input parameters are 
-        ------------------------------------------------------------------------
-        Parameters
-        ------------------------------------------------------------------------
-        :param source_terms: array
-            This is relevant only in the 'scalar' model. 
-            This vector contains the values for the source term on all the given points (term s in eq 27).
-            To solve the Laplace equation, it should be a vector of zeros.
-            To solve the Poisson equation for the pressure, this is the RHS of eq.21.
-            In any case, the specification of the RHS is done outside the assmebly function.
-             
+              
+        :type n_hb: int       
         :param n_hb: int (currently  not recommended) 
             Also for a regression, the harmonic basis can improve the regression
             as they can model global trends which are similar to a low order
@@ -1125,7 +1092,8 @@ class spicy:
             
             For an homogeneous problem, the chosen basis needs no constraints.          
            
-        :param alpha_div: float (default: None)
+        :type alpha_div: float
+        :param alpha_div:
             This enables a divergence free penalty in the entire flow field.
             Increasing this parameter penalizes errors in the divergence free 
             flow more. This is particularly important to obtain good derivatives 
@@ -1581,15 +1549,12 @@ class spicy:
         else:
             raise ValueError('No regression could be performed, check that the model is correctly set')
         return
-    
-   
-        
 
     # 5 Solver using the Shur complement
     def Solve(self, K_cond=1e12):
         """
         This function solves the constrained quadratic problem A, B, b_1, b_2.
-        The method is universal for 2D/3D problems as well as laminar/poisson problems
+        The method is universal for 2D/3D problems as well as laminar/poisson problems.
     
         The input parameters are the class itself and the desired condition 
         number of A which is fixed based on its largest and smallest eigenvalue
@@ -1599,14 +1564,8 @@ class spicy:
         i.e. the right hand-side of the linear system is normalized. The assigned
         weights are rescaled by self.rescale to get the real, physical quantities
         
-        TODO Suggestion: We do a check whether B is empty and if it is, just 
-        do the solution based on the inverted A. This would allow a regression
-        without any constraints
-        
-        ------------------------------------------------------------------------
-        Parameters
-        ------------------------------------------------------------------------
-        :param K_cond: float
+        :type K_cond: float
+        :param K_cond:
           This is the regularization parameter. It is fixing the condition number
           The estimation is based such that the regularize matrix has the condition
           number k_cond. For this, we compute the max and the min eigenvalue.
@@ -1686,19 +1645,18 @@ class spicy:
         This function evaluates the solution of the linear system on an arbitrary
         set of points on the grid.
         The input parameters are 
-        ------------------------------------------------------------------------
-        Parameters
-        ------------------------------------------------------------------------
-        :param grid: list 
+        
+        :type K_cond: list
+        :param grid:
             Contains the points at which the source term is evaluated
             If the model is 2D, then this has [X_P, Y_P].
             If the model is 3D, then this has [X_P, Y_P, Z_P].
             
         :return: U_P, V_P, W_P.  
-        Depending on model='scalar/laminar' and type='2D/3D'    
-        If scalar, the solution is only U_P.
-        If laminar and 2D, the solution is U_P, V_P
-        If laminar and 3D, the solution is U_P, V_P and W_P
+            Depending on model='scalar/laminar' and type='2D/3D'    
+            If scalar, the solution is only U_P.
+            If laminar and 2D, the solution is U_P, V_P
+            If laminar and 3D, the solution is U_P, V_P and W_P
         
         """   
         
@@ -1785,30 +1743,23 @@ class spicy:
         else:
             raise ValueError('Length of Grid is invalid for Type ' + self.type)
             
-       
-
-
-
     def Get_first_Derivatives(self,grid):
-        ''' Compute all derivatives from the RBF solution 
-        The input parameters are 
-        ------------------------------------------------------------------------
-        Parameters
-        ------------------------------------------------------------------------
-        :param grid: list 
+        """ 
+        Compute all derivatives from the RBF solution.  
+        
+        :type grid: list
+        :param grid:
             Contains the points at which the source term is evaluated
             If the model is 2D, then this has [X_P, Y_P].
             If the model is 3D, then this has [X_P, Y_P, Z_P].
 
-        :return: dudx, dudy, dudx/ dvdx, dvdy, dvdx/ dwdx, dwdy, dwdx.
-        
-        Depending on model='scalar/laminar' and type='2D/3D'    
-        If scalar and 2D, the output is dudx, dudy
-        If scalar and 3D, the output is dudx, dudy, dudz        
-        If laminar and 2D, the solution is dudx, dudy, dvdx, dvdy
-        If laminar and 3D, the solution is dudx,dudy,dudx,dvdx,dvdy,dvdx,dwdx,dwdy,dwdx, 
-            
-        ''' 
+        :return: dudx, dudy, dudx/ dvdx, dvdy, dvdx, dwdx, dwdy, dwdx.
+            Depending on model='scalar/laminar' and type='2D/3D'    
+            If scalar and 2D, the output is dudx, dudy
+            If scalar and 3D, the output is dudx, dudy, dudz        
+            If laminar and 2D, the solution is dudx, dudy, dvdx, dvdy
+            If laminar and 3D, the solution is dudx,dudy,dudx,dvdx,dvdy,dvdx,dwdx,dwdy,dwdx, 
+        """ 
         
         # Check the input is correct
         assert type(grid) == list, 'grid must be a list'
@@ -1983,24 +1934,20 @@ class spicy:
     def Evaluate_Source_Term(self, grid, rho):
         """
         This function evaluates the source term on the right hand side of
-        equation (21)
-    
-        The input parameters are 
-        ------------------------------------------------------------------------
-        Parameters
-        ------------------------------------------------------------------------
-        :param grid: list
+        equation (21).
+        
+        :type grid: list
+        :param grid:
             Contains the points at which the source term is evaluated
             If the model is 2D, then this has [X_P, Y_P].
             If the model is 3D, then this has [X_P, Y_P, Z_P].
         
-       :param rho: float
+        :type rho: float
+        :param rho:
            Density of the fluid.
-           
-        Returns
-        -------
-        :param source_term: 1d np.array
-            R.h.s. of equation (21)
+        
+        :return: source_term
+            R.h.s. of equation (21).
         """
         
         # Check the input is correct
@@ -2087,28 +2034,27 @@ class spicy:
         This function evaluates the Neumann boundary conditions for the pressure
         integration in equation (29).
         
-        The input parameters are 
-        ------------------------------------------------------------------------
-        Parameters
-        ------------------------------------------------------------------------
-        :param grid: list
+        :type grid: list
+        :param grid:
             Contains the points at which the source term is evaluated.
             If the model is 2D, then this has [X_P, Y_P].
             If the model is 3D, then this has [X_P, Y_P, Z_P].
         
-        :param normals: list
+        :type normals: list
+        :param normals:
             Contains the points at which the source term is evaluated.
             If the model is 2D, then this has [n_x, n_y].
             If the model is 3D, then this has [n_x, n_y, n_z].
             
-        :param rho: float
+        :type rho: float
+        :param rho:
             Density of the fluid.
-        :param mu: float
+            
+        :type mu: float
+        :param mu:
             Dynamic viscosity of the fluid.
             
-        Returns
-        -------
-        :param P_neu: 1d np.array
+        :return: P_neu
             Normal pressure in equation (29).
         """
         
