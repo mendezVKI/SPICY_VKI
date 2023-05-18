@@ -372,9 +372,11 @@ print('------- in sample pressure error results ---------')
 print('Total pressure error: {0:.3f}%'.format(error_p*100))
 
 # Check the results on the 'testing data'
-P_calc = SP_pres.Get_Sol(grid=[X[],Y])
-
-
+P_calc_test = SP_pres.Get_Sol(grid=[X_p[indices_test],Y_p[indices_test]])
+P_test=P_p[indices_test]
+error_p = np.linalg.norm(P_calc_test-P_test)/np.linalg.norm(P_test)
+print('------- out of sample pressure error results ---------')
+print('Total pressure error: {0:.3f}%'.format(error_p*100))
 
 
 
