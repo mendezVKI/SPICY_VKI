@@ -29,14 +29,18 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> SPICY
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            SPICY
           </a>
               <div class="version">
                 1.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -64,7 +68,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
       <li class="breadcrumb-item active">Functions</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/usage.rst.txt" rel="nofollow"> View page source</a>
@@ -348,8 +352,7 @@ number k_cond. For this, we compute the max and the min eigenvalue.</p>
 <dt class="sig sig-object py" id="spicy_class_m.spicy.Get_Sol">
 <span class="sig-prename descclassname"><span class="pre">spicy_class_m.spicy.</span></span><span class="sig-name descname"><span class="pre">Get_Sol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spicy_class_m.spicy.Get_Sol" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function evaluates the solution of the linear system on an arbitrary
-set of points on the grid.
-The input parameters are</p>
+set of points on the grid.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>grid</strong> – Contains the points at which the source term is evaluated
@@ -357,11 +360,11 @@ If the model is 2D, then this has [X_P, Y_P].
 If the model is 3D, then this has [X_P, Y_P, Z_P].</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>U_P, V_P, W_P.  
+<dd class="field-even"><p>U_sol, V_sol, W_sol.  
 Depending on model=’scalar/laminar’ and type=’2D/3D’    
-If scalar, the solution is only U_P.
-If laminar and 2D, the solution is U_P, V_P
-If laminar and 3D, the solution is U_P, V_P and W_P</p>
+If scalar, the solution is only U_sol.
+If laminar and 2D, the solution is U_sol, V_sol
+If laminar and 3D, the solution is U_sol, V_sol and W_sol</p>
 </dd>
 </dl>
 </dd></dl>
@@ -369,7 +372,8 @@ If laminar and 3D, the solution is U_P, V_P and W_P</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="spicy_class_m.spicy.Get_first_Derivatives">
 <span class="sig-prename descclassname"><span class="pre">spicy_class_m.spicy.</span></span><span class="sig-name descname"><span class="pre">Get_first_Derivatives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spicy_class_m.spicy.Get_first_Derivatives" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute all derivatives from the RBF solution.</p>
+<dd><p>This function evaluates the first derivative of the solution of the
+linear system on an arbitrary set of points on the grid.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>grid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a>) – Contains the points at which the source term is evaluated
@@ -377,12 +381,12 @@ If the model is 2D, then this has [X_P, Y_P].
 If the model is 3D, then this has [X_P, Y_P, Z_P].</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>dudx, dudy, dudx/ dvdx, dvdy, dvdx, dwdx, dwdy, dwdx.
-Depending on model=’scalar/laminar’ and type=’2D/3D’    
-If scalar and 2D, the output is dudx, dudy
-If scalar and 3D, the output is dudx, dudy, dudz        
-If laminar and 2D, the solution is dudx, dudy, dvdx, dvdy
-If laminar and 3D, the solution is dudx,dudy,dudx,dvdx,dvdy,dvdx,dwdx,dwdy,dwdx,</p>
+<dd class="field-even"><p>dUdX, dUdY, dUdX, dVdX, dVdY, dVdX, dWdX, dWdY, dWdX.
+Depending on model = ‘scalar/laminar’ and type = ‘2D/3D’    
+If scalar and 2D, the output is dUdX, dUdY
+If scalar and 3D, the output is dUdX, dUdY, dUdZ        
+If laminar and 2D, the solution is dUdx, dUdY, dVdX, dVdY
+If laminar and 3D, the solution is dUdx, dUdY, dUdX, dVdX, dVdY, dVdX, dWdX, dWdY, dWdX</p>
 </dd>
 </dl>
 </dd></dl>
