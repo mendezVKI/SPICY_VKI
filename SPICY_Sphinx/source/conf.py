@@ -13,7 +13,7 @@
 import os
 import sys
 # sys.path.insert(0, os.path.abspath('.'))
-sys.path.append(os.path.abspath('..' + os.sep + '..' + os.sep + 'Tutorials'))
+sys.path.append(os.path.abspath('..' + os.sep + '..' + os.sep + 'SPICY'))
 
 
 # -- Project information -----------------------------------------------------
@@ -22,7 +22,7 @@ project = 'SPICY'
 copyright = '2023, P. Sperotto, M. Ratz, M. A. Mendez'
 author = 'P. Sperotto, M. Ratz, M. A. Mendez'
 
-import spicy_class_m
+import spicy_class
 
 # The full version, including alpha/beta/rc tags
 version = '1.0'
