@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Functions &mdash; SPICY 1.0 documentation</title>
@@ -102,7 +102,7 @@ it can be readily extended to fields such as the regression of temperature field
 <span class="sig-prename descclassname"><span class="pre">spicy_class.spicy.</span></span><span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gauss'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ST</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spicy_class.spicy.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialization of an instance of the spicy class.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>model</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – This defines the model. Currently, SPICY supports 4 models:</p></li>
 <li><p><strong>data</strong> (<em>list of 1D numpy.ndarray</em>) – If the instance is to be used to solve a regression problem, this 
@@ -162,7 +162,7 @@ lambda: Lagrange multipliers of the RBF regression</p>
 level clustering described in the article. The function must be run 
 before the constraint definition.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>n_K</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a>) – This contains the n_k vector in eq (33). if n_K=[4,10], it means that 
 the clustering will try to have a first level with RBFs whose size
@@ -190,7 +190,7 @@ is used to define the shape factor from the clustering results.</p></li>
 <dd><p>This functions sets the boundary conditions for a scalar problem. The
 function must be run after the clustering was carried out.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>DIR</strong> (<em>list of 1D numpy.ndarray</em>) – This contains the info for the Dirichlet conditions. If the model is
 2D, then this has [X_D, Y_D, c_D]. If the model is 3D, then this has
@@ -216,7 +216,7 @@ remove degrees of freedom.</p></li>
 <dd><p># This functions sets the boundary conditions for a laminar problem. The
 function must be run after the clustering was carried out.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>DIR</strong> (<em>list of 1D numpy.ndarray</em>) – <p>This contains the info for the Dirichlet conditions.
 If the model is 2D, then this has [X_D, Y_D, c_D_X, c_D_Y].
@@ -252,7 +252,7 @@ remove degrees of freedom</p></li>
 <dd><p>Utility function to check the spreading of the RBFs after the clustering.
 No input is required, nothing is assigned to SPICY and no output is generated.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>l</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – This defines the cluster level of RBF that will be visualized.</p>
 </dd>
 </dl>
@@ -264,7 +264,7 @@ No input is required, nothing is assigned to SPICY and no output is generated.</
 <dd><p>This function assembly the matrices A, B, b_1, b_2 for the Poisson problem.
 These are eqs. (31a) - (31d).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>n_hb</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – <p>When solving the Poisson equation, global basis elements such as polynomials or series
 expansions are of great help. This is evident if one note that the eigenfunctions of 
 the Laplace operator are harmonics. 
@@ -290,7 +290,7 @@ For stability purposes, the largest tolerated value at the moment is 10!.</p>
 <span class="sig-prename descclassname"><span class="pre">spicy_class.spicy.</span></span><span class="sig-name descname"><span class="pre">Assembly_Regression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_hb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_div</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spicy_class.spicy.Assembly_Regression" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function assembly the matrices A, B, C, D from the paper.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>n_hb</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – <p>int (currently  not recommended) 
 Also for a regression, the harmonic basis can improve the regression
@@ -331,7 +331,7 @@ Lambda to the class. The weights are computed for the min/max scaled problem,
 i.e. the right hand-side of the linear system is normalized. The assigned
 weights are rescaled by self.rescale to get the real, physical quantities</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>K_cond</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – Default 1e12.
 This is the regularization parameter. It is fixing the condition number
 The estimation is based such that the regularize matrix has the condition
@@ -346,12 +346,12 @@ number k_cond. For this, we compute the max and the min eigenvalue.</p>
 <dd><p>This function evaluates the solution of the linear system on an arbitrary
 set of points on the grid.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>grid</strong> – Contains the points at which the source term is evaluated
 If the model is 2D, then this has [X_P, Y_P].
 If the model is 3D, then this has [X_P, Y_P, Z_P].</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>U_sol, V_sol, W_sol.  
 Depending on model=’scalar/laminar’ and type=’2D/3D’    
 If scalar, the solution is only U_sol.
@@ -367,12 +367,12 @@ If laminar and 3D, the solution is U_sol, V_sol and W_sol</p>
 <dd><p>This function evaluates the first derivative of the solution of the
 linear system on an arbitrary set of points on the grid.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>grid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a>) – Contains the points at which the source term is evaluated
 If the model is 2D, then this has [X_P, Y_P].
 If the model is 3D, then this has [X_P, Y_P, Z_P].</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>dUdX, dUdY, dUdX, dVdX, dVdY, dVdX, dWdX, dWdY, dWdX.
 Depending on model = ‘scalar/laminar’ and type = ‘2D/3D’    
 If scalar and 2D, the output is dUdX, dUdY
@@ -389,7 +389,7 @@ If laminar and 3D, the solution is dUdx, dUdY, dUdX, dVdX, dVdY, dVdX, dWdX, dWd
 <dd><p>This function evaluates the source term on the right hand side of
 equation (21).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>grid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a>) – Contains the points at which the source term is evaluated
 If the model is 2D, then this has [X_P, Y_P].
@@ -397,7 +397,7 @@ If the model is 3D, then this has [X_P, Y_P, Z_P].</p></li>
 <li><p><strong>rho</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – Density of the fluid.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>source_term
 R.h.s. of equation (21).</p>
 </dd>
@@ -410,7 +410,7 @@ R.h.s. of equation (21).</p>
 <dd><p>This function evaluates the Neumann boundary conditions for the pressure
 integration in equation (29).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>grid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a>) – Contains the points at which the Neumann constraint is evaluated.
 If the model is 2D, then this has [X_P, Y_P].
@@ -422,7 +422,7 @@ If the model is 3D, then this has [n_x, n_y, n_z].</p></li>
 <li><p><strong>mu</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – Dynamic viscosity of the fluid.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>P_neu
 Normal pressure in equation (29).</p>
 </dd>
