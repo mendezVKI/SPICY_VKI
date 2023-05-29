@@ -32,7 +32,7 @@ setup(
         'numpy==1.21.5',
         'numpydoc==1.4.0',
         'scikit-learn==1.0.2',
-        'scipy==1.9.1',
+        'scipy==1.10.1',
         'shapely==2.0.1',
         'matplotlib==3.5.2',
         "ipykernel==6.15.2",
