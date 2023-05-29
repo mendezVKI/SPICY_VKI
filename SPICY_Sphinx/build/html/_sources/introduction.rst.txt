@@ -7,7 +7,7 @@ SPICY: Introduction
   :align: center
   :alt: Alternative text
   
-SPICY (Super-resolution and Pressure from Image veloCimetrY) is is a software developed at the von Karman Institute to perform data assimilation of image velocimetry using constrained Radial Basis Functions (RBF). 
+SPICY (Super-resolution and Pressure from Image veloCimetrY) is a software developed at the von Karman Institute to perform data assimilation of image velocimetry using constrained Radial Basis Functions (RBF). 
 The framework works for structured data (as produced by cross-correlation-based algorithms in PIV or Optical FlowS) and unstructured data (produced by tracking algorithms in PTV).
 
 While the main scope is the assimilation of velocity fields, SPICY can also be used for the regression of other fields (e.g., temperature fields).
@@ -18,7 +18,7 @@ The GitHub folder contains four exercises in Python. These include regression of
 For each tutorial, there is a video on our YouTube channel: https://www.youtube.com/@spicyVKI
 
 
-The proposed exercises are the following:
+The list of proposed exercises is following:
 
 1 - Solution of a Laplace problem on the unit square.
 
