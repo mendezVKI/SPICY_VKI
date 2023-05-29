@@ -33,7 +33,7 @@ class spicy:
     """
     SPICY (Super-resolution and Pressure from Image veloCimetrY) is a software 
     developed at the von Karman Institute to perform data assimilation by means 
-    of Radial Basis Functions (RBF). The framework works both for structured and 
+    of Radial Basis Functions (RBF). The framwork works both for structured and 
     unstructered data. Currently, the main application is to perform a regression
     of image velocimetry data and then solve the pressure equation. However, the framework 
     can be readily extended to regression of other fields (e.g. temperature fields).

@@ -7,20 +7,16 @@ SPICY: Introduction
   :align: center
   :alt: Alternative text
   
-SPICY (Super-resolution and Pressure from Image veloCimetrY) is a software developed at the von Karman Institute to 
-perform data assimilation by means of Radial Basis Functions (RBF). The framwork works both for structured and unstructered data. 
-Currently, the main application is to perform a regression of image velocimetry data and then solve the pressure equation.
-However, the framework can be readily extended to regression of other fields (e.g. temperature fields).
+SPICY (Super-resolution and Pressure from Image veloCimetrY) is is a software developed at the von Karman Institute to perform data assimilation of image velocimetry using constrained Radial Basis Functions (RBF). 
+The framework works for structured data (as produced by cross-correlation-based algorithms in PIV or Optical FlowS) and unstructured data (produced by tracking algorithms in PTV).
 
-The theoretical foundation of the RBF framework is described in
-- P. Sperotto, S. Pieraccini, M.A. Mendez, A Meshless Method to Compute Pressure Fields from
-Image Velocimetry, Measurement Science and Technology 33(9), May 2022. The pre-print is 
-available at https://arxiv.org/abs/2112.12752.
+While the main scope is the assimilation of velocity fields, SPICY can also be used for the regression of other fields (e.g., temperature fields).
+The theoretical foundation of the constrained RBF approach is described in - P. Sperotto, S. Pieraccini, M.A. Mendez, A Meshless Method to Compute Pressure Fields from Image Velocimetry, Measurement Science and Technology 33(9), May 2022. (pre-print at https://arxiv.org/abs/2112.12752)
+The GitHub folder contains four exercises in Python. These include regression of synthetic velocity fields as well as the solution of Poisson problems.
 
-Currently, this folder contains four exercises. All of them are done in Python. The exercises
-include regression of synthetic velocity fields as well as the solution of Poisson problems.
 
-For each tutorial, there is a video on our YouTube channel: https://www.youtube.com/@spicyVKI 
+For each tutorial, there is a video on our YouTube channel: https://www.youtube.com/@spicyVKI
+
 
 The proposed exercises are the following:
 
