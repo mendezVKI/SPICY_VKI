@@ -2,8 +2,7 @@
 Functions
 ===================================
 
-SPICY can accept varying dimensions of input data. In particular, it should be lists of 1D arrays, meaning that even
-2D arrays are flattened.
+SPICY accepts input data of varying dimension, which are all converted into lists of 1D arrays.
    
 .. autoclass:: spicy_class.spicy
 

@@ -28,7 +28,6 @@ import spicy_class
 version = '1.0'
 release = '1.0'
 
-
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
@@ -109,7 +108,6 @@ html_sidebars = {
 }
 
 
-
 # -- Options for LaTeX output ---------------------------------------------
 
 latex_elements = {
@@ -129,7 +127,6 @@ latex_elements = {
     #
     # 'figure_align': 'htbp',
 }
-
 
 
 # Example configuration for intersphinx: refer to the Python standard library.

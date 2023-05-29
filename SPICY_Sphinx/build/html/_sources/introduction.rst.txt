@@ -8,9 +8,9 @@ SPICY: Introduction
   :alt: Alternative text
   
 SPICY (Super-resolution and Pressure from Image veloCimetrY) is a software developed at the von Karman Institute to 
-perform data assimilation by means of Radial Basis Functions (RBF). The framwork works both for structured and unstructered data.
-Currently, the main application is to perform a regression of image velocimetry data and then solve the pressure poisson equation
-but it can be readily extended to fields such as the regression of temperature fields.
+perform data assimilation by means of Radial Basis Functions (RBF). The framwork works both for structured and unstructered data. 
+Currently, the main application is to perform a regression of image velocimetry data and then solve the pressure equation.
+However, the framework can be readily extended to regression of other fields (e.g. temperature fields).
 
 The theoretical foundation of the RBF framework is described in
 - P. Sperotto, S. Pieraccini, M.A. Mendez, A Meshless Method to Compute Pressure Fields from
@@ -19,7 +19,8 @@ available at https://arxiv.org/abs/2112.12752.
 
 Currently, this folder contains four exercises. All of them are done in Python. The exercises
 include regression of synthetic velocity fields as well as the solution of Poisson problems.
-For each tutorial, there is a video on our YouTube channel.
+
+For each tutorial, there is a video on our YouTube channel: https://www.youtube.com/@spicyVKI 
 
 The proposed exercises are the following:
 

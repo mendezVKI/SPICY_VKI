@@ -35,13 +35,15 @@ class spicy:
     developed at the von Karman Institute to perform data assimilation by means 
     of Radial Basis Functions (RBF). The framwork works both for structured and 
     unstructered data. Currently, the main application is to perform a regression
-    of image velocimetry data and then solve the pressure poisson equation but 
-    it can be readily extended to fields such as the regression of temperature fields.
+    of image velocimetry data and then solve the pressure equation. However, the framework 
+    can be readily extended to regression of other fields (e.g. temperature fields).
     
     The original article by Sperotto et al. (2022) can be found at:
     https://arxiv.org/abs/2112.12752
     
     YouTube channel with hands-on tutorials can be found at:
+    https://www.youtube.com/@spicyVKI    
+        
     """    
     # 1. Initialize the class with the data
     def __init__(self, data, grid_point, basis='gauss', ST=None):
@@ -55,27 +57,28 @@ class spicy:
         :type data: list of 1D numpy.ndarray
         :param data:
             If the instance is to be used to solve a regression problem, this 
-            list contains the target data. This is an array [u] if the model is
-            scalar, two arrays [u, v] for a 2D vector field and [u, v, w] for a 
-            3D field. If the instance is to be used to solve the Poisson equation,
+            list contains the target data. data is an array [u] if the model is
+            scalar, a list with two arrays [u, v] for a 2D vector field and a list of 
+            three arrays [u, v, w] for a 3D field. 
+            If the instance is to be used to solve the Poisson equation,
             this list contains the forcing term on the RHS of the Poisson equation.
                     
         :type grid point: list of 1D numpy.ndarray
         :param grid_point: 
-            Is a list of arrays containing the grid point [X_G ,Y_G] in 2D and
+            Is a list of arrays containing the grid points: [X_G ,Y_G] in 2D and
             [X_G, Y_G, Z_G] in 3D.   
                
         :type basis: str     
         :param basis: This defines the basis. Currently, the two options are
         
            - ``'gauss'``, i.e. Gaussian RBFs exp(-c_r**2*d(x)) 
-           - ``'c4'``, i.e. C4 RBFs (1+d(x+)/c_r)**5(1-d(x+)/c_r)**5
+           - ``'c4'``, i.e. C4 RBFs (1+d(x+)/c_r)**5(1-d(x+)/c_r)**5 
         
         :type ST: list of 1D numpy.ndarray
         :param ST: 
             Is a list of arrays collecting Reynolds stresses. This is empty if
-            the model is 'scalar' or 'laminar'. If the model is RANSI, it
-            contains [uu']. If the model is RANSA, it contains [uu, vv, uv] 
+            the model is 'scalar' or 'laminar'. If the model is RANSI (isotropic), it
+            contains [uu']. If the model is RANSA (anisotropic), it contains [uu, vv, uv] 
             in 2D and [uu, vv, ww, uv, uw, vw] in 3D.                           
                                    
         General attributes:
@@ -85,10 +88,10 @@ class spicy:
             w: w component in case of velocity field (absent for scalar)
         
         If constraints are assigned:
-            X_D, Y_D, Z_D: coordinates of the points with D conditions
+            X_D, Y_D, Z_D: coordinates of the points with Dirichlet (D) conditions
             c_D: values of the D conditions
             
-            X_N, Y_N, Z_N: coordinates of the points with N conditions
+            X_N, Y_N, Z_N: coordinates of the points with Neumann (N) conditions
             n_x, n_y, n_z: normal versors where N conditions are introduced
             c_N_X, c_N_Y, c_N_Z: values of the N conditions
             
@@ -172,13 +175,15 @@ class spicy:
     def clustering(self, n_K, Areas, r_mM=[0.01,0.3], eps_l=0.7):
         """
         This function defines the collocation of a set of RBFs using the multi-
-        level clustering described in the article. The function must be run 
-        before the constraint definition.
+        level clustering first introduced in the article. Note that we modified the slightly original formulation
+        to ease the programming; see video tutorials for more.
+        The function must be run before the constraint definition.
                  
         :type n_K: list 
         :param n_K:
-            This contains the n_k vector in eq (33). if n_K=[4,10], it means that 
-            the clustering will try to have a first level with RBFs whose size
+            This contains the n_k vector in eq (33) in the paper; this is the 
+            list of expected particles per RBF at each level. For example, if n_K=[4,10], 
+            it means that the clustering will try to have a first level with RBFs whose size
             seeks to embrace 4 points, while the second level seeks to embrace
             10 points, etc. The length of this vector automatically defines the
             number of levels.
@@ -186,8 +191,8 @@ class spicy:
         :type Areas: list
         :param Areas:
             List of the refinement regions for each clustering level. If no 
-            refinement should be done, then this can simply be a list of empty
-            lists. Currently not implemented in 3D.
+            refinement is needed, then this should be a list of empty
+            lists (default option). Currently not implemented in 3D.
         
         :type r_mM: list of two float values
         :param r_mM: default=[0.01, 0.3].
@@ -387,13 +392,13 @@ class spicy:
     def scalar_constraints(self, DIR=[], NEU=[], extra_RBF = True):
         """         
         This functions sets the boundary conditions for a scalar problem. The
-        function must be run after the clustering was carried out.
+        function must be run after the clustering is carried out.
         
         :type DIR: list of 1D numpy.ndarray
         :param DIR: 
             This contains the info for the Dirichlet conditions. If the model is
             2D, then this has [X_D, Y_D, c_D]. If the model is 3D, then this has
-            [X_D, Y_D, Z_D, c_D]. Here, X_D, Y_D, Z_D are the coordinates of the
+            [X_D, Y_D, Z_D, c_D]. Here X_D, Y_D, Z_D are the coordinates of the
             poins where the value c_D is set.
         
         :type NEU: list of 1D numpy.ndarray
@@ -728,7 +733,7 @@ class spicy:
     def plot_RBFs(self,l=0):
         """
         Utility function to check the spreading of the RBFs after the clustering.
-        No input is required, nothing is assigned to SPICY and no output is generated.
+        This function generates several plots. It produces no new variable in SPICY. 
         
         :type l: int
         :param l: 
@@ -802,17 +807,18 @@ class spicy:
     # 4.1. Poisson solver
     def Assembly_Poisson(self, n_hb=0):
         """
+        
         This function assembly the matrices A, B, b_1, b_2 for the Poisson problem.
-        These are eqs. (31a) - (31d).
+        These are eqs. (31a) - (31d) in the original paper (see also video tutorial 1 for more info)
         
         :type n_hb: int
         :param n_hb: 
             When solving the Poisson equation, global basis elements such as polynomials or series
-            expansions are of great help. This is evident if one note that the eigenfunctions of 
+            expansions can be of great help. This is evident if one note that the eigenfunctions of 
             the Laplace operator are harmonics. 
             In a non-homogeneous problem, once could homogenize the basis. This will be proposed for the next relase
-            (which will align with the paper of Manuel). The idea is the following: if the homogeneization is well done and
-            the basis is well chosen, then we will not need constraints for these extra terms of the basis.
+            (which will align with Manuel's paper). The idea is the following: if the homogeneization is well done and
+            the basis is well chosen, then we do not need constraints for these extra terms of the basis.
                    
             For the moment, we let the user introduce the number of extra_basis. 
             These will be sine and cosine bases, which are orthogonal in [-1,1].
@@ -824,7 +830,9 @@ class spicy:
             Similarly, in 3D will be phi_nmk=phi_n(x)*phi_m(y)*phi_k(z).
             For stability purposes, the largest tolerated value at the moment is 10!.
            
-            For an homogeneous problem, the chosen basis needs no constraints.          
+            For an homogeneous problem, the chosen basis needs no constraints.
+            
+            !!!!!!!!!!!!!!!#### this feature is currently under development #####!!!!!!!!!!!!!!!!
         
         """   
         
@@ -952,37 +960,25 @@ class spicy:
     # 4.2. Regression
     def Assembly_Regression(self, n_hb=0, alpha_div=None):
         """
-        This function assembly the matrices A, B, C, D from the paper.
+        This function assembly the matrices A, B, C, D from the paper (see video tutorial 1).
               
         :type n_hb: int       
-        :param n_hb: int (currently  not recommended) 
+        :param n_hb: int  
+        
             Also for a regression, the harmonic basis can improve the regression
             as they can model global trends which are similar to a low order
             polynomial. Furthermore, for homogenous problem, they automatically
             fulfill the boundary conditions.
             
-            In a non-homogeneous problem, once could homogenize the basis. This will be proposed for the next relase
-            (which will align with the paper of Manuel). The idea is the following: if the homogeneization is well done and
-            the basis is well chosen, then we will not need constraints for these extra terms of the basis.
-                    
-            For the moment, we let the user introduce the number of extra_basis. 
-            These will be sine and cosine bases, which are orthogonal in [-1,1].
-            In 1D, they are defined as : sines_n=np.sin(2*np.pi*(n)*x); cos_n=np.cos(np.pi/2*(2*n+1)*x)
-            Given n_hb, we will have that the first n_hb are sines the last n_hb will be cosines.
-            This defines the basis phi_h_n, with n an index from 0 to n_hb**4 in 2D.
-                      
-            In 2D, assuming separation of variables, we will take phi_h_nm=phi_n(x)*phi_m(y).
-            Similarly, in 3D will be phi_nmk=phi_n(x)*phi_m(y)*phi_k(z).
-            For stability purposes, the largest tolerated value at the moment is 10!.
-            
-            For an homogeneous problem, the chosen basis needs no constraints.          
+           See the same entry in the function 'Assembly_Poisson'
            
         :type alpha_div: float
         :param alpha_div:
             This enables a divergence free penalty in the entire flow field.
-            Increasing this parameter penalizes errors in the divergence free 
-            flow more. This is particularly important to obtain good derivatives 
-            for the pressure computation
+            The higher this parameter, the more SPICY penalizes errors in the divergence-free 
+            condition. This is particularly important to obtain good derivatives 
+            for the pressure computation.
+            
          """   
         # Assign the number of harmonic basis functions
         self.n_hb = n_hb
@@ -1373,7 +1369,7 @@ class spicy:
     def Solve(self, K_cond=1e12):
         """
         This function solves the constrained quadratic problem A, B, b_1, b_2.
-        The method is universal for 2D/3D problems as well as laminar/poisson problems.
+        The method is universal for 2D/3D problems as well as laminar/Poisson problems.
     
         The input parameters are the class itself and the desired condition 
         number of A which is fixed based on its largest and smallest eigenvalue
@@ -1385,7 +1381,7 @@ class spicy:
         
         :type K_cond: float
         :param K_cond: Default 1e12.
-          This is the regularization parameter. It is fixing the condition number
+          This is the regularization parameter. It fixes the condition number (see Video 1)
           The estimation is based such that the regularize matrix has the condition
           number k_cond. For this, we compute the max and the min eigenvalue.
         """   
@@ -1689,7 +1685,7 @@ class spicy:
     def Evaluate_Source_Term(self, grid, rho):
         """
         This function evaluates the source term on the right hand side of
-        equation (21).
+        equation (21) in the paper (see video tutorial 1 for more info)
         
         :type grid: list
         :param grid:
@@ -1788,7 +1784,7 @@ class spicy:
     def Get_Pressure_Neumann(self, grid, normals, rho, mu):
         """
         This function evaluates the Neumann boundary conditions for the pressure
-        integration in equation (29).
+        integration in equation (29) from the original paper (see video tutorial 1 for more info)
         
         :type grid: list
         :param grid:
@@ -1955,10 +1951,12 @@ class spicy:
 #  These functions are not needed/called by the user. They are simply helper 
 #  functions required to assemble and solve the linear systems. In the current
 #  release of SPICY, these are:
-#   RBF functions and their derivatives in 2D/3D
-#   Harmonics functions and their derivatives in 2D/3D    
-#   Adding collocation points in the constraints 
+#  - RBF functions and their derivatives in 2D/3D
+#  - Harmonics functions and their derivatives in 2D/3D    
+#  - Adding collocation points in the constraints 
 # =============================================================================
+
+
 
 # =============================================================================
 #  RBF functions in 2D
