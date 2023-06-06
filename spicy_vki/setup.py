@@ -18,7 +18,8 @@ REQUIRED = [
     "matplotlib>=3.3.0",
     "scikit-learn>=1.0",
     "scipy>=1.5",
-    "shapely>=1.7.0"
+    "shapely>=1.7.0",
+    "ipython>=7.15.0"
 ]
 
 
