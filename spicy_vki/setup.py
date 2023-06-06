@@ -11,7 +11,7 @@ URL = 'https://github.com/mendezVKI/SPICY_VKI/tree/main/'
 EMAIL = 'manuel.ratz@vki.ac.be'
 AUTHOR = "P. Sperotto, M. Ratz, M. A. Mendez"
 PYTHON_REQUIRES = '>=3.8.0'
-VERSION = "1.0.16"
+VERSION = "1.0.17"
 
 REQUIRED = [
     "numpy>=1.20",
@@ -19,7 +19,8 @@ REQUIRED = [
     "scikit-learn>=1.0",
     "ipython>=7.16.1",
     "scipy>=1.5",
-    "shapely>=1.7.0"
+    "shapely>=1.7.0",
+    "numpy>=1.1.0"
 ]
 
 

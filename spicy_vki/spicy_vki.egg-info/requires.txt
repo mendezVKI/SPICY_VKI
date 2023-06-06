@@ -4,3 +4,4 @@ scikit-learn>=1.0
 ipython>=7.16.1
 scipy>=1.5
 shapely>=1.7.0
+numpy>=1.1.0
