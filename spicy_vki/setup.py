@@ -5,42 +5,39 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, '..' + sep + 'README.md'), encoding='utf-8') as readme_file:
     readme = readme_file.read()
 
+NAME = 'spicy_vki'
+DESCRIPTION = "SPICY (Super-resolution and Pressure from Image veloCimetrY) is a software developed at the von Karman Institute to perform data assimilation of image velocimetry using constrained Radial Basis Functions (RBF). The framework works for structured data (as produced by cross-correlation-based algorithms in PIV or Optical FlowS) and unstructured data (produced by tracking algorithms in PTV)."
+URL = 'https://github.com/mendezVKI/SPICY_VKI/tree/main/'
+EMAIL = 'manuel.ratz@vki.ac.be'
+AUTHOR = "P. Sperotto, M. Ratz, M. A. Mendez"
+PYTHON_REQUIRES = '>=3.8.0'
+VERSION = "1.0.14"
+
+REQUIRED = [
+    "numpy>=1.20",
+    "matplotlib>=3.3.0",
+    "scikit-learn>=1.0",
+    "scipy>=1.5",
+    "shapely>=1.7.0"
+]
+
+
 setup(
-    name='spicy_vki',
-    python_requires='>3.10.9',
-    version='1.0.7',
-    description="SPICY (Super-resolution and Pressure from Image veloCimetrY) is a software developed at the von Karman Institute to perform data assimilation of image velocimetry using constrained Radial Basis Functions (RBF). The framework works for structured data (as produced by cross-correlation-based algorithms in PIV or Optical FlowS) and unstructured data (produced by tracking algorithms in PTV).",
+    name=NAME,
+    python_requires=PYTHON_REQUIRES,
+    version=VERSION,
+    description=DESCRIPTION,
     long_description=readme,
     long_description_content_type='text/markdown',
-    author="P. Sperotto, M. Ratz, M. A. Mendez",
-    author_email='manuel.ratz@vki.ac.be',
-    url='https://github.com/mendezVKI/SPICY_VKI/tree/main/',
-    packages=find_packages(exclude=['docs', 'tests']),
-    entry_points={
-        'console_scripts': [
-            # 'command = some.module:some_function',
-        ],
-    },
+    author=AUTHOR,
+    author_email=EMAIL,
+    url=URL,
+    packages=find_packages(exclude=['docs']),
     include_package_data=True,
     package_data={
-        'spicy': [
-            # When adding files here, remember to update MANIFEST.in as well,
-            # or else they will not be included in the distribution on PyPI!
-            # 'path/to/data_file',
-        ]
+        'spicy': []
     },
-    install_requires=[
-        'numpy>=1.21.5',
-        'numpydoc>=1.4.0',
-        'scikit-learn>=1.0.2',
-        'scipy>=1.7.1',
-        'shapely>=2.0.1',
-        'matplotlib>=3.5.2',
-        "ipykernel>=6.15.2",
-        "ipython>=7.31.1",
-        "ipython-genutils>=0.2.0",
-        "ipywidgets>=7.6.5",
-    ],
+    install_requires=REQUIRED,
     license="BSD (3-clause)",
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
