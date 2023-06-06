@@ -7,7 +7,8 @@ with open(path.join(here, '..' + sep + 'README.md'), encoding='utf-8') as readme
 
 setup(
     name='spicy_vki',
-    version='1.0.2',
+    python_requires='>3.10.9',
+    version='1.0.7',
     description="SPICY (Super-resolution and Pressure from Image veloCimetrY) is a software developed at the von Karman Institute to perform data assimilation of image velocimetry using constrained Radial Basis Functions (RBF). The framework works for structured data (as produced by cross-correlation-based algorithms in PIV or Optical FlowS) and unstructured data (produced by tracking algorithms in PTV).",
     long_description=readme,
     long_description_content_type='text/markdown',
@@ -29,16 +30,16 @@ setup(
         ]
     },
     install_requires=[
-        'numpy==1.21.5',
-        'numpydoc==1.4.0',
-        'scikit-learn==1.0.2',
-        'scipy==1.7.1',
-        'shapely==2.0.1',
-        'matplotlib==3.5.2',
-        "ipykernel==6.15.2",
-        "ipython==7.31.1",
-        "ipython-genutils==0.2.0",
-        "ipywidgets==7.6.5",
+        'numpy>=1.21.5',
+        'numpydoc>=1.4.0',
+        'scikit-learn>=1.0.2',
+        'scipy>=1.7.1',
+        'shapely>=2.0.1',
+        'matplotlib>=3.5.2',
+        "ipykernel>=6.15.2",
+        "ipython>=7.31.1",
+        "ipython-genutils>=0.2.0",
+        "ipywidgets>=7.6.5",
     ],
     license="BSD (3-clause)",
     classifiers=[
