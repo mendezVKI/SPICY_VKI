@@ -1,0 +1,47 @@
+Metadata-Version: 2.1
+Name: spicy-vki
+Version: 1.0.18
+Summary: SPICY (Super-resolution and Pressure from Image veloCimetrY) is a software developed at the von Karman Institute to perform data assimilation of image velocimetry using constrained Radial Basis Functions (RBF). The framework works for structured data (as produced by cross-correlation-based algorithms in PIV or Optical FlowS) and unstructured data (produced by tracking algorithms in PTV).
+Home-page: https://github.com/mendezVKI/SPICY_VKI/tree/main/
+Author: P. Sperotto, M. Ratz, M. A. Mendez
+Author-email: manuel.ratz@vki.ac.be
+License: BSD (3-clause)
+Classifier: Development Status :: 2 - Pre-Alpha
+Classifier: Natural Language :: English
+Classifier: Programming Language :: Python :: 3
+Requires-Python: >=3.8.0
+Description-Content-Type: text/markdown
+
+# SPICY_VKI
+ The repository contains the codes linked to the SPICY project (Super-resolution and Pressure from Image Velocimetry).
+
+
+ SPICY is a software developed at the von Karman Institute to perform data assimilation of image velocimetry using constrained Radial Basis Functions (RBF). 
+The framework works for structured data (as produced by cross-correlation-based algorithms in PIV or Optical FlowS) and unstructured data (produced by tracking algorithms in PTV).
+
+While the main scope is the assimilation of velocity fields, SPICY can also be used for the regression of other fields (e.g., temperature fields).
+The theoretical foundation of the constrained RBF approach is described in - P. Sperotto, S. Pieraccini, M.A. Mendez, A Meshless Method to Compute Pressure Fields from Image Velocimetry, Measurement Science and Technology 33(9), May 2022. (pre-print at https://arxiv.org/abs/2112.12752).
+
+The GitHub folder contains four exercises in Python. These include regression of synthetic velocity fields as well as the solution of Poisson problems.
+For each tutorial, there is a video on our YouTube channel: https://www.youtube.com/@spicyVKI
+
+
+The list of proposed exercises is following:
+
+1 - Solution of a Laplace problem on the unit square.
+
+2 - Regression of the velocity field of a 2D Lamb-Oseen vortex.
+
+3 - Regression of the velocity field and integration of the Poisson equation for the 2D flow past a cylinder.
+
+4 - Regression of the velocity field and integration of the Poisson equation for the 3D Stokes flow past a sphere.
+
+Exercises 2 - 4 are taken from the article from Sperotto et al. (2022) https://arxiv.org/abs/2112.12752
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

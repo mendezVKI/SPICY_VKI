@@ -1,0 +1,8 @@
+setup.py
+spicy/__init__.py
+spicy/spicy_class.py
+spicy_vki.egg-info/PKG-INFO
+spicy_vki.egg-info/SOURCES.txt
+spicy_vki.egg-info/dependency_links.txt
+spicy_vki.egg-info/requires.txt
+spicy_vki.egg-info/top_level.txt
