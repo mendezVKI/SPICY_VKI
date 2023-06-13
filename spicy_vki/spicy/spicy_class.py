@@ -49,10 +49,6 @@ class spicy:
     def __init__(self, data, grid_point, basis='gauss', ST=None):
         """
         Initialization of an instance of the spicy class. 
-        
-        :type model: str
-        :param model: 
-            This defines the model. Currently, SPICY supports 4 models:
                                           
         :type data: list of 1D numpy.ndarray
         :param data:
