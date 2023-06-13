@@ -38,7 +38,7 @@ bibliography: paper.bib
 # Summary
 
 This work presents our `SPICY' (meshlesS Pressure from Image veloCimetrY) toolbox for meshless data assimilation in image velocimetry. The proposed approach allows for computing an analytic representation of velocity and pressure fields from noisy and sparse fields, regardless of whether these are acquired using cross-correlation or particle tracking algorithms. SPICY uses penalized and constrained Radial Basis Functions (RBFs), allowing for enforcing physical priors (e.g., divergence-free in incompressible flows) or boundary conditions (e.g., no slip). The resulting analytic expression allows for super-resolution on arbitrary points and accurate computation of derivatives. These could be used to compute derived quantities (e.g., vorticity) and to integrate the pressure Poisson equation to compute pressure fields in the case of incompressible flows.
-A set of video tutorials on how to use SPICY is made available with the submission.
+A set of video tutorials on how to use SPICY is provided.
 
 # Statement of need
 
