@@ -3,13 +3,11 @@ SPICY: References and material
 ================================
 
 
-
 Publications
 --------------
 
 * P. Sperotto, S. Pieraccini, M.A. Mendez, A Meshless Method to Compute Pressure Fields from Image Velocimetry, Measurement Science and Technology 33(9), May 2022. The pre-print is available at https://arxiv.org/abs/2112.12752.
 * P. Sperotto, S. Pieraccini, M.A. Mendez, A RANS approach to the Meshless Computation of Pressure Fields from Image Velocimetry, 20th International Symposium on Application of Laser and Imaging Techniques to Fluid Mechanics. LISBON, Portugal, July 11-14, 2022. The pre-print is available at https://arxiv.org/abs/2207.04975
-
 
 
 Tutorials

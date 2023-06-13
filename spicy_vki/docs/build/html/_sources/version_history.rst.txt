@@ -6,4 +6,4 @@ Release History
 -----------------------------------
 - First release of the SPICY class along with four tutorials
 - Supports 2D/3D scalar and vector regression problems and 2D/3D poisson problems
-- RBF system is always globally assembled, RBFs can be Gaussians ('gauss') or compact support ('c4')
+- RBF system assembled globally; RBFs can be Gaussians ('gauss') or compact support ('c4')
