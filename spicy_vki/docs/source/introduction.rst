@@ -3,7 +3,7 @@ SPICY: Introduction
 =================================
 
 .. image:: spicy_logo.png
-  :target: https://imgur.com/a/1EfqrkO
+  :target: https://github.com/mendezVKI/SPICY_VKI/blob/main/spicy_vki/docs/source/spicy_logo.png
   :width: 700
   
 SPICY (Super-resolution and Pressure from Image veloCimetrY) is a software developed at the von Karman Institute to perform data assimilation of image velocimetry using constrained Radial Basis Functions (RBF). 
