@@ -11,6 +11,8 @@ The theoretical foundation of the constrained RBF approach is described in - P. 
 The GitHub folder contains four exercises in Python. These include regression of synthetic velocity fields as well as the solution of Poisson problems.
 For each tutorial, there is a video on our YouTube channel: https://www.youtube.com/@spicyVKI
 
+The documentatation can be found here: https://spicy-vki.readthedocs.io/en/latest/index.html
+
 
 The list of proposed exercises is following:
 
