@@ -23,7 +23,7 @@ authors:
     corresponding: true # (This is how to denote the corresponding author)
     affiliation: 1
 affiliations:
- - name: the von Karman Institute for Fluid Dynamics (VKI), Rhode St. Genese, 1640, Belgium
+ - name: The von Karman Institute for Fluid Dynamics (VKI), Rhode St. Genese, 1640, Belgium
    index: 1
 
 date: 16 June 2023
@@ -50,7 +50,7 @@ Recently, in [@Sperotto2022], we proposed a meshless approach based on constrain
 
 # Tutorials and ongoing works
 
-A total of four tutorials have been published in the repository, allowing for reproducing the results in [@Sperotto2022]. The first tutorial presents the use of SPICY for solving the Laplace Equation in 2D while tutorials two and three focus on the velocity regression and pressure computation on 2D velocity fields with or without the divergence free constraints. Finally, tutorial four tackles a 3D case, namely the Stokes flow past a sphere. The solver currently implemented is a minor variant of the direct approach proposed in the original publication. Ongoing works are the extension to Reynolds average formulation to treat turbulent flows, as presented in [@Sperotto2022b] and the implementation of a Partition of Unity (PUM) approach to limit the memory usage as in [@Ratz2022a]. 
+A total of four tutorials have been published in the repository, allowing for reproducing the results in [@Sperotto2022]. The first tutorial presents the use of SPICY for solving the Laplace Equation in 2D, while tutorials two and three focus on the velocity regression and pressure computation on 2D velocity fields with or without the divergence-free constraints. Finally, tutorial four tackles a 3D case, namely the Stokes flow past a sphere. The solver currently implemented is a minor variant of the direct approach proposed in the original publication. Ongoing works are the extension to Reynolds average formulation to treat turbulent flows, as presented in [@Sperotto2022b] and the implementation of a Partition of Unity (PUM) approach to limit the memory usage, as in [@Ratz2022a]. 
 
 
 # Acknowledgments
