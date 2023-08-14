@@ -24,6 +24,15 @@ REQUIRED = [
 ]
 
 
+# #%%
+# import os
+# with open('spicy_vki.egg-info' + os.sep + 'requires.txt', 'r') as file:
+#     # test.extend(file.readlines()[:-2])
+#     lines = file.readlines()
+# lines = [line[:-1] for line in lines]
+
+# #%%
+
 setup(
     name=NAME,
     python_requires=PYTHON_REQUIRES,
