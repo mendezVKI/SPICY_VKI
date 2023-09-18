@@ -1,26 +1,24 @@
 from os import path, sep
 from setuptools import setup, find_packages
 
-here = path.abspath(path.dirname(__file__))
-with open(path.join(here, '..' + sep + 'README.md'), encoding='utf-8') as readme_file:
+#here = path.abspath(path.dirname(__file__))
+with open( 'C:\Users\mendez\Documents\GitHub\SPICY_VKI\README.md', encoding='utf-8') as readme_file:
     readme = readme_file.read()
 
 NAME = 'spicy_vki'
 DESCRIPTION = "SPICY (Super-resolution and Pressure from Image veloCimetrY) is a software developed at the von Karman Institute to perform data assimilation of image velocimetry using constrained Radial Basis Functions (RBF). The framework works for structured data (as produced by cross-correlation-based algorithms in PIV or Optical FlowS) and unstructured data (produced by tracking algorithms in PTV)."
 URL = 'https://github.com/mendezVKI/SPICY_VKI/tree/main/'
-EMAIL = 'manuel.ratz@vki.ac.be'
+EMAIL = 'mendez@vki.ac.be'
 AUTHOR = "P. Sperotto, M. Ratz, M. A. Mendez"
 PYTHON_REQUIRES = '>=3.8.0'
 VERSION = "1.0.0"
 
 REQUIRED = [
-    "numpy>=1.20",
-    "matplotlib>=3.3.0",
+    "numpy>=1.20",    
     "scikit-learn>=1.0",
     "ipython>=7.16.1",
     "scipy>=1.5",
-    "shapely>=1.7.0",
-    "numpydoc>=1.1.0"
+    "shapely>=1.7.0",    
 ]
 
 
@@ -44,6 +42,7 @@ setup(
     url=URL,
     packages=find_packages(exclude=['docs']),
     include_package_data=True,
+    extras_require={"tutorials": ["matplotlib>=3.3.0"]},
     package_data={
         'spicy': []
     },
