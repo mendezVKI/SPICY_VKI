@@ -1087,7 +1087,7 @@ class spicy:
                                self.c_k, self.basis)
                     ))
                 # Assemble A and b_1, we also rescale b_1
-                self.A = 2*Matrix_Phi_3D_X.T.dot(Matrix_Phi_2D_X)
+                self.A = 2*Matrix_Phi_3D_X.T.dot(Matrix_Phi_3D_X)
                 self.b_1 = 2*Matrix_Phi_3D_X.T.dot(self.u) / self.rescale
                 
         # Laminar model
