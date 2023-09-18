@@ -2,8 +2,9 @@ from os import path, sep
 from setuptools import setup, find_packages
 
 #here = path.abspath(path.dirname(__file__))
-with open( 'C:\Users\mendez\Documents\GitHub\SPICY_VKI\README.md', encoding='utf-8') as readme_file:
+with open(r"C:\Users\mendez\Documents\GitHub\SPICY_VKI\README.md") as readme_file:
     readme = readme_file.read()
+
 
 NAME = 'spicy_vki'
 DESCRIPTION = "SPICY (Super-resolution and Pressure from Image veloCimetrY) is a software developed at the von Karman Institute to perform data assimilation of image velocimetry using constrained Radial Basis Functions (RBF). The framework works for structured data (as produced by cross-correlation-based algorithms in PIV or Optical FlowS) and unstructured data (produced by tracking algorithms in PTV)."
