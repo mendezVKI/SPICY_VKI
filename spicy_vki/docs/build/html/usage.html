@@ -112,7 +112,7 @@ If the instance is to be used to solve the Poisson equation,
 this list contains the forcing term on the RHS of the Poisson equation.</p></li>
 <li><p><strong>grid_point</strong> – Is a list of arrays containing the grid points: [X_G ,Y_G] in 2D and
 [X_G, Y_G, Z_G] in 3D.</p></li>
-<li><p><strong>basis</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – <p>This defines the basis. Currently, the two options are</p>
+<li><p><strong>basis</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – <p>This defines the basis. Currently, the two options are</p>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">'gauss'</span></code>, i.e. Gaussian RBFs exp(-c_r**2*d(x))</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">'c4'</span></code>, i.e. C4 RBFs (1+d(x+)/c_r)**5(1-d(x+)/c_r)**5</p></li>
@@ -165,13 +165,13 @@ The function must be run before the constraint definition.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>n_K</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a>) – This contains the n_k vector in eq (33) in the paper; this is the 
+<li><p><strong>n_K</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a>) – This contains the n_k vector in eq (33) in the paper; this is the 
 list of expected particles per RBF at each level. For example, if n_K=[4,10], 
 it means that the clustering will try to have a first level with RBFs whose size
 seeks to embrace 4 points, while the second level seeks to embrace
 10 points, etc. The length of this vector automatically defines the
 number of levels.</p></li>
-<li><p><strong>Areas</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a>) – List of the refinement regions for each clustering level. If no 
+<li><p><strong>Areas</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a>) – List of the refinement regions for each clustering level. If no 
 refinement is needed, then this should be a list of empty
 lists (default option). Currently not implemented in 3D.</p></li>
 <li><p><strong>r_mM</strong> (<em>list of two float values</em>) – default=[0.01, 0.3].
@@ -203,7 +203,7 @@ then this has [X_N, Y_N, n_x, n_y, c_N]. If the model is 3D, then
 this has [X_N, Y_N, Z_N, n_x, n_y, n_z, c_N]. Here X_N, Y_N, Z_N are
 the coordinates of the poins where the value c_N is set for the 
 directional derivative along the normal direction n_x, n_y, n_z.</p></li>
-<li><p><strong>extra_RBF</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – default = True
+<li><p><strong>extra_RBF</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – default = True
 This is a flag to put extra collocation points where a constraint is
 set. It can improve the solution of the linear system as constraints
 remove degrees of freedom.</p></li>
@@ -239,7 +239,7 @@ If the model is 3D, then this has [X_Div, Y_Div, Z_Div].</p>
 <p>Here X_Div, Y_Div, Z_Div are the coordinates of the poins where the
 divergence-free condition is imposed.</p>
 </p></li>
-<li><p><strong>extra_RBF</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – default=True
+<li><p><strong>extra_RBF</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – default=True
 This is a flag to put extra collocation points where a constraint is
 set. It can improve the solution of the linear system as constraints
 remove degrees of freedom</p></li>
@@ -255,7 +255,7 @@ remove degrees of freedom</p></li>
 This function generates several plots. It produces no new variable in SPICY.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>l</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – This defines the cluster level of RBF that will be visualized.</p>
+<dd class="field-odd"><p><strong>l</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – This defines the cluster level of RBF that will be visualized.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -267,7 +267,7 @@ This function generates several plots. It produces no new variable in SPICY.</p>
 These are eqs. (31a) - (31d) in the original paper (see also video tutorial 1 for more info)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>n_hb</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – <p>When solving the Poisson equation, global basis elements such as polynomials or series
+<dd class="field-odd"><p><strong>n_hb</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – <p>When solving the Poisson equation, global basis elements such as polynomials or series
 expansions can be of great help. This is evident if one note that the eigenfunctions of 
 the Laplace operator are harmonics. 
 In a non-homogeneous problem, once could homogenize the basis. This will be proposed for the next relase
@@ -295,7 +295,7 @@ For stability purposes, the largest tolerated value at the moment is 10!.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>n_hb</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – <p>int</p>
+<li><p><strong>n_hb</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – <p>int</p>
 <blockquote>
 <div><p>Also for a regression, the harmonic basis can improve the regression
 as they can model global trends which are similar to a low order
@@ -304,7 +304,7 @@ fulfill the boundary conditions.</p>
 </div></blockquote>
 <p>See the same entry in the function ‘Assembly_Poisson’</p>
 </p></li>
-<li><p><strong>alpha_div</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – This enables a divergence free penalty in the entire flow field.
+<li><p><strong>alpha_div</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a>) – This enables a divergence free penalty in the entire flow field.
 The higher this parameter, the more SPICY penalizes errors in the divergence-free 
 condition. This is particularly important to obtain good derivatives 
 for the pressure computation.</p></li>
@@ -326,7 +326,7 @@ i.e. the right hand-side of the linear system is normalized. The assigned
 weights are rescaled by self.rescale to get the real, physical quantities</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>K_cond</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – Default 1e12.
+<dd class="field-odd"><p><strong>K_cond</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a>) – Default 1e12.
 This is the regularization parameter. It fixes the condition number (see Video 1)
 The estimation is based such that the regularize matrix has the condition
 number k_cond. For this, we compute the max and the min eigenvalue.</p>
@@ -362,7 +362,7 @@ If laminar and 3D, the solution is U_sol, V_sol and W_sol</p>
 linear system on an arbitrary set of points on the grid.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>grid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a>) – Contains the points at which the source term is evaluated
+<dd class="field-odd"><p><strong>grid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a>) – Contains the points at which the source term is evaluated
 If the model is 2D, then this has [X_P, Y_P].
 If the model is 3D, then this has [X_P, Y_P, Z_P].</p>
 </dd>
@@ -385,10 +385,10 @@ equation (21) in the paper (see video tutorial 1 for more info)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>grid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a>) – Contains the points at which the source term is evaluated
+<li><p><strong>grid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a>) – Contains the points at which the source term is evaluated
 If the model is 2D, then this has [X_P, Y_P].
 If the model is 3D, then this has [X_P, Y_P, Z_P].</p></li>
-<li><p><strong>rho</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – Density of the fluid.</p></li>
+<li><p><strong>rho</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a>) – Density of the fluid.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -406,14 +406,14 @@ integration in equation (29) from the original paper (see video tutorial 1 for m
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>grid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a>) – Contains the points at which the Neumann constraint is evaluated.
+<li><p><strong>grid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a>) – Contains the points at which the Neumann constraint is evaluated.
 If the model is 2D, then this has [X_P, Y_P].
 If the model is 3D, then this has [X_P, Y_P, Z_P].</p></li>
-<li><p><strong>normals</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a>) – Contains normals of the points at which the Neumann constraint is evaluated.
+<li><p><strong>normals</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a>) – Contains normals of the points at which the Neumann constraint is evaluated.
 If the model is 2D, then this has [n_x, n_y].
 If the model is 3D, then this has [n_x, n_y, n_z].</p></li>
-<li><p><strong>rho</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – Density of the fluid.</p></li>
-<li><p><strong>mu</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – Dynamic viscosity of the fluid.</p></li>
+<li><p><strong>rho</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a>) – Density of the fluid.</p></li>
+<li><p><strong>mu</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a>) – Dynamic viscosity of the fluid.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
