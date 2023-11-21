@@ -31,6 +31,7 @@ sphinx:
 # See https://docs.readthedocs.io/en/stable/guides/reproducible-builds.html
 python:
    install:
-   - requirements: spicy_vki/spicy_vki.egg-info/requires.txt
+   - method: pip
+     requirements: spicy_vki/spicy_vki.egg-info/requires.txt
      extra_requirements:
-     - tutorials
+        - tutorials
