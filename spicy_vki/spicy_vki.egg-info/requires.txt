@@ -3,6 +3,4 @@ scikit-learn>=1.0
 ipython>=7.16.1
 scipy>=1.5
 shapely>=1.7.0
-
-[tutorials]
 matplotlib>=3.3.0

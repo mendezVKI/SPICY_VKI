@@ -15,13 +15,10 @@ This will install the package with all its mandatory dependencies, namely:
 "ipython>=7.16.1",
 "scipy>=1.5",
 "shapely>=1.7.0",
+"matplotlib>=3.3.0",
 ```
 
-Note that if you want to run the tutorial in the `./Tutorials` folder, you need `matplotlib` for visualization purposes. Installing spicy with the optional depedencies:
-
-`pip install spicy_vki[tutorials]`
-
-will install matplotlib. The turotials are available in the github repository SPICY_VKI.
+The turotials are available in the github repository SPICY_VKI.
 
 
 SPICY
