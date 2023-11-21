@@ -15,7 +15,3 @@ python:
    install:
      - requirements: spicy_vki/spicy_vki.egg-info/requires.txt
        extra_requirements: [tutorials]
-       
-build:
-  os: ubuntu-22.04
-  image: latest
