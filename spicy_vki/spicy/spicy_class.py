@@ -347,27 +347,27 @@ class spicy:
         # on the type of RBF but not whether the type is 2D or 3D.
         if self.basis =='gauss':
             # Set the max and min values of c_k
-            c_min = 1/(2*r_mM[1])*np.sqrt(np.log(2))
-            c_max = 1/(2*r_mM[0])*np.sqrt(np.log(2))
+            c_min = 1/(r_mM[1])*np.sqrt(np.log(2))
+            c_max = 1/(r_mM[0])*np.sqrt(np.log(2))
             # compute the c_k 
             c_k = np.sqrt(-np.log(eps_l))/sigma
             # crop to the minimum and maximum value
             c_k[c_k < c_min] = c_min
             c_k[c_k > c_max] = c_max
             # for plotting purposes, we store also the diameters
-            d_k = 1/c_k*np.sqrt(np.log(2))
+            d_k = 2/c_k*np.sqrt(np.log(2))
             
         elif self.basis == 'c4':
             # Set the max and min values of c_k
-            c_min = 2*r_mM[0] / np.sqrt(1 - 0.5**0.2)
-            c_max = 2*r_mM[1] / np.sqrt(1 - 0.5**0.2)
+            c_min = r_mM[0] / np.sqrt(1 - 0.5**0.2)
+            c_max = r_mM[1] / np.sqrt(1 - 0.5**0.2)
             # compute the c _k
             c_k = sigma / np.sqrt(1 - eps_l**0.2)
             # crop to the minimum and maximum value
             c_k[c_k < c_min] = c_min
             c_k[c_k > c_max] = c_max
             # for plotting purposes, we store also the diameters
-            d_k = c_k * np.sqrt(1 - 0.5**0.2)
+            d_k = 2*c_k * np.sqrt(1 - 0.5**0.2)
         self.c_k = c_k
         self.d_k = d_k
         
@@ -2743,8 +2743,8 @@ def add_constraint_collocations_2D(X_constr, Y_constr, X_C, Y_C, r_mM, eps_l, ba
     # Check the basis
     if basis == 'gauss': # Gaussians
         # Set the max and min values of c_k  
-        c_min = 1 / (2*r_mM[1]) * np.sqrt(np.log(2))
-        c_max = 1 / (2*r_mM[0]) * np.sqrt(np.log(2))
+        c_min = 1 / (r_mM[1]) * np.sqrt(np.log(2))
+        c_max = 1 / (r_mM[0]) * np.sqrt(np.log(2))
         # Loop over all constraints
         for k in range(n_constr):
             # Get the distance to all collocation points
@@ -2760,11 +2760,11 @@ def add_constraint_collocations_2D(X_constr, Y_constr, X_C, Y_C, r_mM, eps_l, ba
             # get the maximum value in the case of the Gaussian
             c_ks[k] = np.max(c_k)
         # for plotting purposes, we store also the diameters             
-        d_k = 1/c_ks*np.sqrt(np.log(2))      
+        d_k = 2/c_ks*np.sqrt(np.log(2))      
         
     elif basis == 'c4': # C4
-        c_min = 2*r_mM[0] / np.sqrt(1 - 0.5**0.2)
-        c_max = 2*r_mM[1] / np.sqrt(1 - 0.5**0.2)
+        c_min = r_mM[0] / np.sqrt(1 - 0.5**0.2)
+        c_max = r_mM[1] / np.sqrt(1 - 0.5**0.2)
         for k in range(n_constr):
             # Get the distance to all collocation points
             dist_to_colloc = np.sqrt((X_C - X_constr[k])**2 + (Y_C - Y_constr[k])**2)
@@ -2779,7 +2779,7 @@ def add_constraint_collocations_2D(X_constr, Y_constr, X_C, Y_C, r_mM, eps_l, ba
             # get the minimum value in the case of the c4
             c_ks[k] = np.min(c_k)
         # for plotting purposes, we store also the diameters
-        d_k = c_ks * np.sqrt(1 - 0.5**0.2)
+        d_k = 2*c_ks * np.sqrt(1 - 0.5**0.2)
     
     return c_ks, d_k
 
@@ -2817,8 +2817,8 @@ def add_constraint_collocations_3D(X_constr, Y_constr, Z_constr, X_C, Y_C, Z_C, 
     # Check the basis
     if basis == 'gauss': # Gaussians
         # Set the max and min values of c_k  
-        c_min = 1 / (2*r_mM[1]) * np.sqrt(np.log(2))
-        c_max = 1 / (2*r_mM[0]) * np.sqrt(np.log(2))
+        c_min = 1 / (r_mM[1]) * np.sqrt(np.log(2))
+        c_max = 1 / (r_mM[0]) * np.sqrt(np.log(2))
         # Loop over all constraints
         for k in range(n_constr):
             # Get the distance to all collocation points
@@ -2837,11 +2837,11 @@ def add_constraint_collocations_3D(X_constr, Y_constr, Z_constr, X_C, Y_C, Z_C, 
             # get the maximum value in the case of the Gaussian
             c_ks[k] = np.max(c_k)
         # for plotting purposes, we store also the diameters             
-        d_k = 1/c_ks*np.sqrt(np.log(2))      
+        d_k = 2/c_ks*np.sqrt(np.log(2))      
         
     elif basis == 'c4': # C4
-        c_min = 2*r_mM[0] / np.sqrt(1 - 0.5**0.2)
-        c_max = 2*r_mM[1] / np.sqrt(1 - 0.5**0.2)
+        c_min = r_mM[0] / np.sqrt(1 - 0.5**0.2)
+        c_max = r_mM[1] / np.sqrt(1 - 0.5**0.2)
         for k in range(n_constr):
             # Get the distance to all collocation points
             dist_to_colloc = np.sqrt((X_C - X_constr[k])**2 +\
@@ -2859,6 +2859,6 @@ def add_constraint_collocations_3D(X_constr, Y_constr, Z_constr, X_C, Y_C, Z_C, 
             # get the minimum value in the case of the c4
             c_ks[k] = np.min(c_k)
         # for plotting purposes, we store also the diameters
-        d_k = c_ks * np.sqrt(1 - 0.5**0.2)
+        d_k = 2*c_ks * np.sqrt(1 - 0.5**0.2)
     
     return c_ks, d_k
