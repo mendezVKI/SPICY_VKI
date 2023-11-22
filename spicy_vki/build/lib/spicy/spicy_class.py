@@ -49,10 +49,6 @@ class spicy:
     def __init__(self, data, grid_point, basis='gauss', ST=None):
         """
         Initialization of an instance of the spicy class. 
-        
-        :type model: str
-        :param model: 
-            This defines the model. Currently, SPICY supports 4 models:
                                           
         :type data: list of 1D numpy.ndarray
         :param data:
@@ -118,8 +114,8 @@ class spicy:
         # Check the input is correct
         assert type(data) == list, 'Input data must be a list'
         assert type(grid_point) == list, 'Input grid_point must be a list'
-        assert type(basis) == str, 'Basis must be a string'
-        assert ST == None or type(ST) == list, 'ST must be a string or a list'
+        assert type(basis) == str, 'Input basis must be a string'
+        assert ST == None or type(ST) == list, 'Input ST must be a \'None\' or a list'
                         
         # Assign the basis
         if basis == 'gauss' or basis == 'c4':
@@ -351,27 +347,27 @@ class spicy:
         # on the type of RBF but not whether the type is 2D or 3D.
         if self.basis =='gauss':
             # Set the max and min values of c_k
-            c_min = 1/(2*r_mM[1])*np.sqrt(np.log(2))
-            c_max = 1/(2*r_mM[0])*np.sqrt(np.log(2))
+            c_min = 1/(r_mM[1])*np.sqrt(np.log(2))
+            c_max = 1/(r_mM[0])*np.sqrt(np.log(2))
             # compute the c_k 
             c_k = np.sqrt(-np.log(eps_l))/sigma
             # crop to the minimum and maximum value
             c_k[c_k < c_min] = c_min
             c_k[c_k > c_max] = c_max
             # for plotting purposes, we store also the diameters
-            d_k = 1/c_k*np.sqrt(np.log(2))
+            d_k = 2/c_k*np.sqrt(np.log(2))
             
         elif self.basis == 'c4':
             # Set the max and min values of c_k
-            c_min = 2*r_mM[0] / np.sqrt(1 - 0.5**0.2)
-            c_max = 2*r_mM[1] / np.sqrt(1 - 0.5**0.2)
+            c_min = r_mM[0] / np.sqrt(1 - 0.5**0.2)
+            c_max = r_mM[1] / np.sqrt(1 - 0.5**0.2)
             # compute the c _k
             c_k = sigma / np.sqrt(1 - eps_l**0.2)
             # crop to the minimum and maximum value
             c_k[c_k < c_min] = c_min
             c_k[c_k > c_max] = c_max
             # for plotting purposes, we store also the diameters
-            d_k = c_k * np.sqrt(1 - 0.5**0.2)
+            d_k = 2*c_k * np.sqrt(1 - 0.5**0.2)
         self.c_k = c_k
         self.d_k = d_k
         
@@ -1091,7 +1087,7 @@ class spicy:
                                self.c_k, self.basis)
                     ))
                 # Assemble A and b_1, we also rescale b_1
-                self.A = 2*Matrix_Phi_3D_X.T.dot(Matrix_Phi_2D_X)
+                self.A = 2*Matrix_Phi_3D_X.T.dot(Matrix_Phi_3D_X)
                 self.b_1 = 2*Matrix_Phi_3D_X.T.dot(self.u) / self.rescale
                 
         # Laminar model
@@ -1971,24 +1967,24 @@ def Phi_RBF_2D(X_G, Y_G, X_C, Y_C, c_k, basis):
     """
     # This is the contribution of the RBF part
     n_b = len(X_C); n_p = len(X_G)
-    Phi_RBF = np.zeros((n_p,n_b))
+    Phi_RBF = np.zeros((n_p, n_b))
     
     # What comes next depends on the type of chosen RBF
     if basis == 'gauss':
         # Iterate over all basis elements
         for r in range(n_b):
             # Compute the Gaussian
-            gaussian=np.exp(-c_k[r]**2*((X_C[r]-X_G)**2+(Y_C[r]-Y_G)**2))
+            gaussian = np.exp(-c_k[r]**2 * ((X_G-X_C[r])**2 + (Y_G-Y_C[r])**2))
             # Assemble into matrix
-            Phi_RBF[:,r]=gaussian
+            Phi_RBF[:,r] = gaussian
 
     elif basis == 'c4':
         # Iterate over all basis elements
         for r in range(n_b):
             # Get distance
-            d = np.sqrt((X_G - X_C[r])**2 + (Y_G - Y_C[r])**2)
+            d = np.sqrt((X_G-X_C[r])**2 + (Y_G-Y_C[r])**2)
             # Compute Phi
-            phi = (1 + d/c_k[r])**5 * (1 - d/c_k[r])**5
+            phi = (1+d/c_k[r])**5 * (1-d/c_k[r])**5
             # Compact support
             phi[np.abs(d) > c_k[r]] = 0
             # Assemble into matrix
@@ -2007,24 +2003,24 @@ def Phi_RBF_2D_x(X_G, Y_G, X_C, Y_C, c_k, basis):
     # number of bases (n_b) and points (n_p)
     n_b = len(X_C); n_p = len(X_G)
     # Initialize the matrix
-    Phi_RBF_x = np.zeros((n_p,n_b))
+    Phi_RBF_x = np.zeros((n_p, n_b))
     
     # What comes next depends on the type of chosen RBF
     if basis == 'gauss':
         # Iterate over all basis elements
         for r in range(n_b):
             # Compute the Gaussian
-            gaussian=np.exp(-c_k[r]**2*((X_C[r]-X_G)**2+(Y_C[r]-Y_G)**2))
+            gaussian = np.exp(-c_k[r]**2 * ((X_G-X_C[r])**2 + (Y_G-Y_C[r])**2))
             # Multiply with inner term and assemble into matrix
-            Phi_RBF_x[:,r]=2*c_k[r]**2*(X_C[r]-X_G)*gaussian
+            Phi_RBF_x[:,r] = - 2*c_k[r]**2 * (X_G-X_C[r])*gaussian
             
     elif basis == 'c4':
         # Iterate over all basis elements
         for r in range(n_b):
             # Get distance
-            d = np.sqrt((X_C[r] - X_G)**2 + (Y_C[r] - Y_G)**2)
+            d = np.sqrt((X_G-X_C[r])**2 + (Y_G-Y_C[r])**2)
             # Compute derivative along x
-            phi = 10 / c_k[r]**10 * (c_k[r] + d)**4 * (c_k[r] - d)**4 * (X_C[r] - X_G)
+            phi = - 10/c_k[r]**10 * (c_k[r]+d)**4 * (c_k[r]-d)**4 * (X_G-X_C[r])
             # Compact support
             phi[np.abs(d) > c_k[r]] = 0
             # Assemble into matrix
@@ -2043,24 +2039,24 @@ def Phi_RBF_2D_y(X_G, Y_G, X_C, Y_C, c_k, basis):
     # number of bases (n_b) and points (n_p)
     n_b = len(X_C); n_p = len(X_G)
     # Initialize the matrix
-    Phi_RBF_y = np.zeros((n_p,n_b))
+    Phi_RBF_y = np.zeros((n_p, n_b))
   
     # What comes next depends on the type of chosen RBF
     if basis == 'gauss':
         # Iterate over all basis elements
         for r in range(n_b):
             # Compute the Gaussian
-            gaussian=np.exp(-c_k[r]**2*((X_C[r]-X_G)**2+(Y_C[r]-Y_G)**2))
+            gaussian = np.exp(-c_k[r]**2 * ((X_G-X_C[r])**2 + (Y_G-Y_C[r])**2))
             # Multiply with inner term and assemble into matrix
-            Phi_RBF_y[:,r]=2*c_k[r]**2*(Y_C[r]-Y_G)*gaussian
+            Phi_RBF_y[:,r] = - 2*c_k[r]**2 * (Y_G-Y_C[r])*gaussian
             
     elif basis == 'c4':
         # Iterate over all basis elements
         for r in range(n_b):
             # Get distance
-            d = np.sqrt((X_G - X_C[r])**2 + (Y_G - Y_C[r])**2)
+            d = np.sqrt((X_G-X_C[r])**2 + (Y_G-Y_C[r])**2)
             # Compute derivative along y
-            phi = 10 / c_k[r]**10 * (c_k[r] + d)**4 * (c_k[r] - d)**4 * (Y_C[r] - Y_G)
+            phi = - 10/c_k[r]**10 * (c_k[r]+d)**4 * (c_k[r]-d)**4 * (Y_G-Y_C[r])
             # Compact support
             phi[np.abs(d) > c_k[r]] = 0
             # Assemble into matrix
@@ -2086,7 +2082,7 @@ def Phi_RBF_2D_Laplacian(X_G, Y_G, X_C, Y_C, c_k, basis):
         # Iterate over all basis elements
         for r in range(n_b):
             # Compute the Gaussian
-            gaussian = np.exp(-c_k[r]**2*((X_C[r]-X_G)**2+(Y_C[r]-Y_G)**2))
+            gaussian = np.exp(-c_k[r]**2*((X_G-X_C[r])**2 + (Y_G-Y_C[r])**2))
             # Get second derivative along x and y
             Partial_xx = 4*c_k[r]**4*(X_C[r]-X_G)**2*gaussian-2*c_k[r]**2*gaussian
             Partial_yy = 4*c_k[r]**4*(Y_C[r]-Y_G)**2*gaussian-2*c_k[r]**2*gaussian
@@ -2097,7 +2093,7 @@ def Phi_RBF_2D_Laplacian(X_G, Y_G, X_C, Y_C, c_k, basis):
         # Iterate over all basis elements
         for r in range(n_b):
             # Get distance
-            d = np.sqrt((X_G - X_C[r])**2 + (Y_G - Y_C[r])**2)
+            d = np.sqrt((X_G-X_C[r])**2 + (Y_G-Y_C[r])**2)
             # Compute the prefactor in the second derivative
             factor = 10 / c_k[r]**10 * (c_k[r] + d)**3 * (c_k[r] - d)**3
             # Multiply with inner derivative
@@ -2126,25 +2122,25 @@ def Phi_RBF_3D(X_G, Y_G, Z_G, X_C, Y_C, Z_C, c_k, basis):
     The basis can be 'c4' or 'gauss'.
     """
     # This is the contribution of the RBF part
-    n_b=len(X_C); n_p=len(X_G)
-    Phi_RBF=np.zeros((n_p,n_b))
+    n_b = len(X_C); n_p = len(X_G)
+    Phi_RBF = np.zeros((n_p, n_b))
     
     # What comes next depends on the type of chosen RBF
     if basis == 'gauss':
         # Iterate over all basis elements
         for r in range(n_b):
             # Compute the Gaussian
-            gaussian=np.exp(-c_k[r]**2*((X_C[r]-X_G)**2 + (Y_C[r]-Y_G)**2 + (Z_C[r]-Z_G)**2))
+            gaussian = np.exp(-c_k[r]**2 * ((X_G-X_C[r])**2 + (Y_G-Y_C[r])**2 + (Z_G-Z_C[r])**2))
             # Assemble into matrix
-            Phi_RBF[:,r]=gaussian
+            Phi_RBF[:,r] = gaussian
 
     elif basis == 'c4':
         # Iterate over all basis elements
         for r in range(n_b):
             # Get distance
-            d = np.sqrt((X_G - X_C[r])**2 + (Y_G - Y_C[r])**2 + (Z_G - Z_C[r])**2)
+            d = np.sqrt((X_G-X_C[r])**2 + (Y_G-Y_C[r])**2 + (Z_G-Z_C[r])**2)
             # Compute Phi
-            phi = (1 + d/c_k[r])**5 * (1 - d/c_k[r])**5
+            phi = (1+d/c_k[r])**5 * (1-d/c_k[r])**5
             # Compact support
             phi[np.abs(d) > c_k[r]] = 0
             # Assemble into matrix
@@ -2160,26 +2156,26 @@ def Phi_RBF_3D_x(X_G, Y_G, Z_G, X_C, Y_C, Z_C, c_k, basis):
     output is a matrix of side (n_p) x (n_c). The basis can be 'c4' or 'gauss'.
     """
     # number of bases (n_b) and points (n_p)
-    n_b=len(X_C); n_p=len(X_G)
+    n_b = len(X_C); n_p = len(X_G)
     # Initialize the matrix
-    Phi_RBF_x=np.zeros((n_p,n_b))
+    Phi_RBF_x = np.zeros((n_p, n_b))
     
     # What comes next depends on the type of chosen RBF
     if basis == 'gauss':
         # Iterate over all basis elements
         for r in range(n_b):
             # Compute the Gaussian
-            gaussian=np.exp(-c_k[r]**2*((X_C[r]-X_G)**2 + (Y_C[r]-Y_G)**2 + (Z_C[r]-Z_G)**2))
+            gaussian = np.exp(-c_k[r]**2 * ((X_G-X_C[r])**2 + (Y_G-Y_C[r])**2 + (Z_G-Z_C[r])**2))
             # Multiply with inner term and assemble into matrix
-            Phi_RBF_x[:,r]=2*c_k[r]**2*(X_C[r]-X_G)*gaussian
+            Phi_RBF_x[:,r] = - 2*c_k[r]**2 * (X_G - X_C[r])*gaussian
             
     elif basis == 'c4':
         # Iterate over all basis elements
         for r in range(n_b):
             # Get distance
-            d = np.sqrt((X_C[r] - X_G)**2 + (Y_C[r] - Y_G)**2 + (Z_C[r] - Z_G)**2)
+            d = np.sqrt((X_G-X_C[r])**2 + (Y_G-Y_C[r])**2 + (Z_G-Z_C[r])**2)
             # Compute derivative along x
-            phi = 10 / c_k[r]**10 * (c_k[r] + d)**4 * (c_k[r] - d)**4 * (X_C[r] - X_G)
+            phi = - 10/c_k[r]**10 * (c_k[r]+d)**4 * (c_k[r]-d)**4 * (X_G-X_C[r])
             # Compact support
             phi[np.abs(d) > c_k[r]] = 0
             # Assemble into matrix
@@ -2198,24 +2194,24 @@ def Phi_RBF_3D_y(X_G, Y_G, Z_G, X_C, Y_C, Z_C, c_k, basis):
     # number of bases (n_b) and points (n_p)
     n_b = len(X_C); n_p = len(X_G)
     # Initialize the matrix
-    Phi_RBF_y = np.zeros((n_p,n_b))
+    Phi_RBF_y = np.zeros((n_p, n_b))
     
     # What comes next depends on the type of chosen RBF
     if basis == 'gauss':
         # Iterate over all basis elements
         for r in range(n_b):
             # Compute the Gaussian
-            gaussian=np.exp(-c_k[r]**2*((X_C[r]-X_G)**2 + (Y_C[r]-Y_G)**2 + (Z_C[r]-Z_G)**2))
+            gaussian = np.exp(-c_k[r]**2 * ((X_G-X_C[r])**2 + (Y_G-Y_C[r])**2 + (Z_G-Z_C[r])**2))
             # Multiply with inner term and assemble into matrix
-            Phi_RBF_y[:,r]=2*c_k[r]**2*(Y_C[r]-Y_G)*gaussian
+            Phi_RBF_y[:,r] = - 2*c_k[r]**2 * (Y_G-Y_C[r])*gaussian
             
     elif basis == 'c4':
         # Iterate over all basis elements
         for r in range(n_b):
             # Get distance
-            d = np.sqrt((X_C[r] - X_G)**2 + (Y_C[r] - Y_G)**2 + (Z_C[r] - Z_G)**2)
+            d = np.sqrt((X_G-X_C[r])**2 + (Y_G-Y_C[r])**2 + (Z_G-Z_C[r])**2)
             # Compute derivative along x
-            phi = 10 / c_k[r]**10 * (c_k[r] + d)**4 * (c_k[r] - d)**4 * (Y_C[r] - Y_G)
+            phi = - 10/c_k[r]**10 * (c_k[r]+d)**4 * (c_k[r]-d)**4 * (Y_G-Y_C[r])
             # Compact support
             phi[np.abs(d) > c_k[r]] = 0
             # Assemble into matrix
@@ -2234,24 +2230,24 @@ def Phi_RBF_3D_z(X_G, Y_G, Z_G, X_C, Y_C, Z_C, c_k, basis):
     # number of bases (n_b) and points (n_p)
     n_b = len(X_C); n_p = len(X_G)
     # Initialize the matrix
-    Phi_RBF_z = np.zeros((n_p,n_b))
+    Phi_RBF_z = np.zeros((n_p, n_b))
     
     # What comes next depends on the type of chosen RBF
     if basis == 'gauss':
         # Iterate over all basis elements
         for r in range(n_b):
             # Compute the Gaussian
-            gaussian=np.exp(-c_k[r]**2*((X_C[r]-X_G)**2 + (Y_C[r]-Y_G)**2 + (Z_C[r]-Z_G)**2))
+            gaussian = np.exp(-c_k[r]**2 * ((X_G-X_C[r])**2 + (Y_G-Y_C[r])**2 + (Z_G-Z_C[r])**2))
             # Multiply with inner term and assemble into matrix
-            Phi_RBF_z[:,r]=2*c_k[r]**2*(Z_C[r]-Z_G)*gaussian
+            Phi_RBF_z[:,r] = - 2*c_k[r]**2 * (Z_G-Z_C[r])*gaussian
             
     elif basis == 'c4':
         # Iterate over all basis elements
         for r in range(n_b):
             # Get distance
-            d = np.sqrt((X_C[r] - X_G)**2 + (Y_C[r] - Y_G)**2 + (Z_C[r] - Z_G)**2)
+            d = np.sqrt((X_G-X_C[r])**2 + (Y_G-Y_C[r])**2 + (Z_G-Z_C[r])**2)
             # Compute derivative along x
-            phi = 10 / c_k[r]**10 * (c_k[r] + d)**4 * (c_k[r] - d)**4 * (Z_C[r] - Z_G)
+            phi = - 10/c_k[r]**10 * (c_k[r]+d)**4 * (c_k[r]-d)**4 * (Z_G-Z_C[r])
             # Compact support
             phi[np.abs(d) > c_k[r]] = 0
             # Assemble into matrix
@@ -2276,11 +2272,11 @@ def Phi_RBF_3D_Laplacian(X_G, Y_G, Z_G, X_C, Y_C, Z_C, c_k, basis):
         # Iterate over all basis elements
         for r in range(n_b):
             # Compute the Gaussian
-            gaussian = np.exp(-c_k[r]**2*((X_C[r]-X_G)**2 + (Y_C[r]-Y_G)**2 + (Z_C[r]-Z_G)**2))
+            gaussian = np.exp(-c_k[r]**2*((X_G-X_C[r])**2 + (Y_G-Y_C[r])**2 + (Z_G-Z_C[r])**2))
             # Get second derivative along x and y
-            Partial_xx = 4*c_k[r]**4*(X_C[r]-X_G)**2*gaussian-2*c_k[r]**2*gaussian
-            Partial_yy = 4*c_k[r]**4*(Y_C[r]-Y_G)**2*gaussian-2*c_k[r]**2*gaussian
-            Partial_zz = 4*c_k[r]**4*(Z_C[r]-Z_G)**2*gaussian-2*c_k[r]**2*gaussian
+            Partial_xx = 4*c_k[r]**4*(X_G-X_C[r])**2*gaussian - 2*c_k[r]**2*gaussian
+            Partial_yy = 4*c_k[r]**4*(Y_G-Y_C[r])**2*gaussian - 2*c_k[r]**2*gaussian
+            Partial_zz = 4*c_k[r]**4*(Z_G-Z_C[r])**2*gaussian - 2*c_k[r]**2*gaussian
             # Assemble into matrix
             Lap_RBF[:,r] = Partial_xx + Partial_yy  + Partial_zz
 
@@ -2288,7 +2284,7 @@ def Phi_RBF_3D_Laplacian(X_G, Y_G, Z_G, X_C, Y_C, Z_C, c_k, basis):
         # Iterate over all basis elements
         for r in range(n_b):
             # Get distance
-            d = np.sqrt((X_G - X_C[r])**2 + (Y_G - Y_C[r])**2 + (Z_G - Z_C[r])**2)
+            d = np.sqrt((X_G-X_C[r])**2 + (Y_G-Y_C[r])**2 + (Z_G-Z_C[r])**2)
             # Compute the prefactor in the second derivative
             factor = 10 / c_k[r]**10 * (c_k[r] + d)**3 * (c_k[r] - d)**3
             # Multiply with inner derivative
@@ -2747,8 +2743,8 @@ def add_constraint_collocations_2D(X_constr, Y_constr, X_C, Y_C, r_mM, eps_l, ba
     # Check the basis
     if basis == 'gauss': # Gaussians
         # Set the max and min values of c_k  
-        c_min = 1 / (2*r_mM[1]) * np.sqrt(np.log(2))
-        c_max = 1 / (2*r_mM[0]) * np.sqrt(np.log(2))
+        c_min = 1 / (r_mM[1]) * np.sqrt(np.log(2))
+        c_max = 1 / (r_mM[0]) * np.sqrt(np.log(2))
         # Loop over all constraints
         for k in range(n_constr):
             # Get the distance to all collocation points
@@ -2764,11 +2760,11 @@ def add_constraint_collocations_2D(X_constr, Y_constr, X_C, Y_C, r_mM, eps_l, ba
             # get the maximum value in the case of the Gaussian
             c_ks[k] = np.max(c_k)
         # for plotting purposes, we store also the diameters             
-        d_k = 1/c_ks*np.sqrt(np.log(2))      
+        d_k = 2/c_ks*np.sqrt(np.log(2))      
         
     elif basis == 'c4': # C4
-        c_min = 2*r_mM[0] / np.sqrt(1 - 0.5**0.2)
-        c_max = 2*r_mM[1] / np.sqrt(1 - 0.5**0.2)
+        c_min = r_mM[0] / np.sqrt(1 - 0.5**0.2)
+        c_max = r_mM[1] / np.sqrt(1 - 0.5**0.2)
         for k in range(n_constr):
             # Get the distance to all collocation points
             dist_to_colloc = np.sqrt((X_C - X_constr[k])**2 + (Y_C - Y_constr[k])**2)
@@ -2783,7 +2779,7 @@ def add_constraint_collocations_2D(X_constr, Y_constr, X_C, Y_C, r_mM, eps_l, ba
             # get the minimum value in the case of the c4
             c_ks[k] = np.min(c_k)
         # for plotting purposes, we store also the diameters
-        d_k = c_ks * np.sqrt(1 - 0.5**0.2)
+        d_k = 2*c_ks * np.sqrt(1 - 0.5**0.2)
     
     return c_ks, d_k
 
@@ -2821,8 +2817,8 @@ def add_constraint_collocations_3D(X_constr, Y_constr, Z_constr, X_C, Y_C, Z_C, 
     # Check the basis
     if basis == 'gauss': # Gaussians
         # Set the max and min values of c_k  
-        c_min = 1 / (2*r_mM[1]) * np.sqrt(np.log(2))
-        c_max = 1 / (2*r_mM[0]) * np.sqrt(np.log(2))
+        c_min = 1 / (r_mM[1]) * np.sqrt(np.log(2))
+        c_max = 1 / (r_mM[0]) * np.sqrt(np.log(2))
         # Loop over all constraints
         for k in range(n_constr):
             # Get the distance to all collocation points
@@ -2841,11 +2837,11 @@ def add_constraint_collocations_3D(X_constr, Y_constr, Z_constr, X_C, Y_C, Z_C, 
             # get the maximum value in the case of the Gaussian
             c_ks[k] = np.max(c_k)
         # for plotting purposes, we store also the diameters             
-        d_k = 1/c_ks*np.sqrt(np.log(2))      
+        d_k = 2/c_ks*np.sqrt(np.log(2))      
         
     elif basis == 'c4': # C4
-        c_min = 2*r_mM[0] / np.sqrt(1 - 0.5**0.2)
-        c_max = 2*r_mM[1] / np.sqrt(1 - 0.5**0.2)
+        c_min = r_mM[0] / np.sqrt(1 - 0.5**0.2)
+        c_max = r_mM[1] / np.sqrt(1 - 0.5**0.2)
         for k in range(n_constr):
             # Get the distance to all collocation points
             dist_to_colloc = np.sqrt((X_C - X_constr[k])**2 +\
@@ -2863,6 +2859,6 @@ def add_constraint_collocations_3D(X_constr, Y_constr, Z_constr, X_C, Y_C, Z_C, 
             # get the minimum value in the case of the c4
             c_ks[k] = np.min(c_k)
         # for plotting purposes, we store also the diameters
-        d_k = c_ks * np.sqrt(1 - 0.5**0.2)
+        d_k = 2*c_ks * np.sqrt(1 - 0.5**0.2)
     
     return c_ks, d_k

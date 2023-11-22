@@ -2,7 +2,7 @@ from os import path, sep
 from setuptools import setup, find_packages
 
 #here = path.abspath(path.dirname(__file__))
-with open(r"C:\Users\mendez\Documents\GitHub\SPICY_VKI\README.md") as readme_file:
+with open(r".." + sep + "README.md") as readme_file:
     readme = readme_file.read()
 
 
@@ -12,7 +12,7 @@ URL = 'https://github.com/mendezVKI/SPICY_VKI/tree/main/'
 EMAIL = 'mendez@vki.ac.be'
 AUTHOR = "P. Sperotto, M. Ratz, M. A. Mendez"
 PYTHON_REQUIRES = '>=3.8.0'
-VERSION = "1.0.1"
+VERSION = "1.0.2"
 
 REQUIRED = [
     "numpy>=1.20",    

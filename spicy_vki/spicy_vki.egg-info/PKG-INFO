@@ -1,23 +1,18 @@
 Metadata-Version: 2.1
 Name: spicy-vki
-Version: 1.0.1
+Version: 1.0.2
 Summary: SPICY (Super-resolution and Pressure from Image veloCimetrY) is a software developed at the von Karman Institute to perform data assimilation of image velocimetry using constrained Radial Basis Functions (RBF). The framework works for structured data (as produced by cross-correlation-based algorithms in PIV or Optical FlowS) and unstructured data (produced by tracking algorithms in PTV).
 Home-page: https://github.com/mendezVKI/SPICY_VKI/tree/main/
 Author: P. Sperotto, M. Ratz, M. A. Mendez
 Author-email: mendez@vki.ac.be
 License: BSD (3-clause)
+Platform: UNKNOWN
 Classifier: Development Status :: 2 - Pre-Alpha
 Classifier: Natural Language :: English
 Classifier: Programming Language :: Python :: 3
 Requires-Python: >=3.8.0
 Description-Content-Type: text/markdown
-Requires-Dist: numpy>=1.20
-Requires-Dist: scikit-learn>=1.0
-Requires-Dist: ipython>=7.16.1
-Requires-Dist: scipy>=1.5
-Requires-Dist: shapely>=1.7.0
 Provides-Extra: tutorials
-Requires-Dist: matplotlib>=3.3.0; extra == "tutorials"
 
 SPICY_VKI
 ========
@@ -36,13 +31,10 @@ This will install the package with all its mandatory dependencies, namely:
 "ipython>=7.16.1",
 "scipy>=1.5",
 "shapely>=1.7.0",
+"matplotlib>=3.3.0",
 ```
 
-Note that if you want to run the tutorial in the `./Tutorials` folder, you need `matplotlib` for visualization purposes. Installing spicy with the optional depedencies:
-
-`pip install spicy_vki[tutorials]`
-
-will install matplotlib. The turotials are available in the github repository SPICY_VKI.
+The turotials are available in the github repository SPICY_VKI.
 
 
 SPICY
@@ -80,3 +72,5 @@ Tutorials 2 - 4 are taken from the article from Sperotto et al. (2022) https://a
  
  
  
+
+
