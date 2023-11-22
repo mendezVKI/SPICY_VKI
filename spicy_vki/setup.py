@@ -12,7 +12,7 @@ URL = 'https://github.com/mendezVKI/SPICY_VKI/tree/main/'
 EMAIL = 'mendez@vki.ac.be'
 AUTHOR = "P. Sperotto, M. Ratz, M. A. Mendez"
 PYTHON_REQUIRES = '>=3.8.0'
-VERSION = "1.0.3"
+VERSION = "1.0.4"
 
 REQUIRED = [
     "numpy>=1.20",    

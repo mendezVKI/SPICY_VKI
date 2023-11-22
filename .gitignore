@@ -4,7 +4,6 @@ Develpoment_Notes
 Presentations
 SPICY_Pietro
 *.bak
-spicy_vki/spicy_vki.egg-info
 spicy_vki/spicy/__pycache__
 spicy_vki/spicy/spicy_class.py.bak
 paper/paper.bib.sav.tmp
@@ -13,3 +12,4 @@ Tutorials/__pycache__
 ./SPICY_Sphinx
 NOTES
 Unittests
+PUM_Migration

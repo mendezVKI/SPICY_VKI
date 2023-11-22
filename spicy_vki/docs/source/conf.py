@@ -25,8 +25,8 @@ author = 'P. Sperotto, M. Ratz, M. A. Mendez'
 import spicy_class
 
 # The full version, including alpha/beta/rc tags
-version = '1.0.3'
-release = '1.0.3'
+version = '1.0.4'
+release = '1.0.4'
 
 # -- General configuration ---------------------------------------------------
 
