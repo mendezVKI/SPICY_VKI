@@ -1,18 +1,3 @@
-Metadata-Version: 2.1
-Name: spicy-vki
-Version: 1.0.5
-Summary: SPICY (Super-resolution and Pressure from Image veloCimetrY) is a software developed at the von Karman Institute to perform data assimilation of image velocimetry using constrained Radial Basis Functions (RBF). The framework works for structured data (as produced by cross-correlation-based algorithms in PIV or Optical Flows) and unstructured data (produced by tracking algorithms in PTV).
-Home-page: https://github.com/mendezVKI/SPICY_VKI/tree/main/
-Author: P. Sperotto, M. Ratz, M. A. Mendez
-Author-email: mendez@vki.ac.be
-License: BSD (3-clause)
-Platform: UNKNOWN
-Classifier: Development Status :: 2 - Pre-Alpha
-Classifier: Natural Language :: English
-Classifier: Programming Language :: Python :: 3
-Requires-Python: >=3.8.0
-Description-Content-Type: text/markdown
-
 SPICY_VKI
 ========
 
@@ -71,5 +56,3 @@ Tutorials 2 - 4 are taken from the article from Sperotto et al. (2022) https://a
  
  
  
-
-
