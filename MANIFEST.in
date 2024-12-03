@@ -1,0 +1,5 @@
+# Include the README file
+include README.md
+
+# Include all Python files in the spicy_vki package
+recursive-include spicy_vki *.py

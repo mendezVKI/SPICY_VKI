@@ -1,0 +1,601 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Functions &mdash; SPICY 1.0.5 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css?v=7f9a90b1" />
+
+  
+      <script src="_static/documentation_options.js?v=d55fa986"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Release History" href="version_history.html" />
+    <link rel="prev" title="SPICY: References and material" href="material.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            SPICY
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">SPICY: Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="min_versions.html">Minimum Version of Python and NumPy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="material.html">SPICY: References and material</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#spicy_vki.spicy.Spicy.__init__"><code class="docutils literal notranslate"><span class="pre">__init__()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#spicy_vki.spicy.Spicy.collocation"><code class="docutils literal notranslate"><span class="pre">collocation()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#spicy_vki.spicy.Spicy.scalar_constraints"><code class="docutils literal notranslate"><span class="pre">scalar_constraints()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#spicy_vki.spicy.Spicy.vector_constraints"><code class="docutils literal notranslate"><span class="pre">vector_constraints()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#spicy_vki.spicy.Spicy.plot_RBFs"><code class="docutils literal notranslate"><span class="pre">plot_RBFs()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#spicy_vki.spicy.Spicy.Assembly_Poisson"><code class="docutils literal notranslate"><span class="pre">Assembly_Poisson()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#spicy_vki.spicy.Spicy.Assembly_Regression"><code class="docutils literal notranslate"><span class="pre">Assembly_Regression()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#spicy_vki.spicy.Spicy.Solve"><code class="docutils literal notranslate"><span class="pre">Solve()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#spicy_vki.spicy.Spicy.get_sol"><code class="docutils literal notranslate"><span class="pre">get_sol()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#spicy_vki.spicy.Spicy.get_source_term"><code class="docutils literal notranslate"><span class="pre">get_source_term()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#spicy_vki.spicy.Spicy.get_pressure_neumann"><code class="docutils literal notranslate"><span class="pre">get_pressure_neumann()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="version_history.html">Release History</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">SPICY</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Functions</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/usage.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="functions">
+<h1>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h1>
+<p>SPICY accepts input data of varying dimension, which are all converted into lists of 1D arrays.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="spicy_vki.spicy.Spicy.__init__">
+<span class="sig-prename descclassname"><span class="pre">spicy_vki.spicy.Spicy.</span></span><span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gauss'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ST</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'laminar'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spicy_vki.spicy.Spicy.__init__" title="Link to this definition">¶</a></dt>
+<dd><p>Initialization of an instance of the spicy class.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul>
+<li><p><strong>data</strong> (<em>list of 1D numpy.ndarray</em>) – Input data for the regression or a Poisson problem.</p>
+<p>For a regression, it has to have specific shapes</p>
+<ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">model</span></code> = ‘laminar’ and <code class="docutils literal notranslate"><span class="pre">data</span></code> = [X_G, Y_G], it is [u, v], i.e. the
+components of a 2D velocity field</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">model</span></code> = ‘laminar’ and <code class="docutils literal notranslate"><span class="pre">data</span></code> = [X_G, Y_G, Z_G], it is [u, v, w], i.e. the
+components of a 3D velocity field</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">model</span></code> = ‘scalar’, <code class="docutils literal notranslate"><span class="pre">data</span></code> can be [u1, u2, …, uN]. Multiple regressions
+can be done at once in this way and they share computations. However, they must
+share the same coordinates and the constraints have to be in the same data points.</p></li>
+</ul>
+<p>If the instance is to be used to solve the Poisson equation,
+this list contains the forcing term on the RHS of the Poisson equation.
+<code class="docutils literal notranslate"><span class="pre">model</span></code> must be ‘scalar’ in that case.</p>
+</li>
+<li><p><strong>points</strong> (<em>list of 1D numpy.ndarray</em>) – Is a list of arrays containing the points: [X_G ,Y_G] in 2D and
+[X_G, Y_G, Z_G] in 3D.</p></li>
+<li><p><strong>basis</strong> (<em>str, default ‘gauss’</em>) –  This defines the basis. Currently, the two options are</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'gauss'</span></code>, i.e. Gaussian RBFs exp(-c_r**2*d(x))</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'c4'</span></code>, i.e. C4 RBFs (1+d(x+)/c_r)**5(1-d(x+)/c_r)**5</p></li>
+</ul>
+</li>
+<li><p><strong>ST</strong> (<em>list of 1D numpy.ndarray, default None</em>) – Is a list of arrays collecting Reynolds stresses. This is empty if
+the model is ‘scalar’ or ‘laminar’. If the model is RANSI (isotropic), it
+contains [uu’]. If the model is RANSA (anisotropic), it contains [uu, vv, uv]
+in 2D and [uu, vv, ww, uv, uw, vw] in 3D.</p></li>
+<li><p><strong>model</strong> (<em>str, default ‘laminar’</em>) – Must be one of ‘laminar’ or ‘scalar’. See input <code class="docutils literal notranslate"><span class="pre">data</span></code> on how to use it.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.1.0.</span></p>
+</div>
+</li>
+<li><p><strong>verbose</strong> (<em>int, default 2</em>) – Sets the verbosity to print for the user</p>
+<ul class="simple">
+<li><p>0: no information printed</p></li>
+<li><p>1: updates on loops and multiple regressions</p></li>
+<li><p>2: details of each step (should only be used for a small number of regressions)</p></li>
+</ul>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.1.0.</span></p>
+</div>
+</li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>General attributes:</dt><dd><ul class="simple">
+<li><p>X_G, Y_G, Z_G: coordinates of the point in which the data is available</p>
+<ul>
+<li><p>if model = <code class="docutils literal notranslate"><span class="pre">laminar</span></code>, we assign the two (three) velocities u, v, (w) in 2D (3D)
+Note that each of these is of size (n_p, 1) to handle multidimensional inputs</p></li>
+<li><p>if model = <code class="docutils literal notranslate"><span class="pre">scalar</span></code>, we assign the input data as u stacked on top of each other.
+I.e., if <code class="docutils literal notranslate"><span class="pre">data</span></code> = [u1, u2, u3], <code class="docutils literal notranslate"><span class="pre">u</span></code> is of size (n_p, 3)</p></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt>If constraints are assigned:</dt><dd><ul class="simple">
+<li><p>X_D, Y_D, Z_D: coordinates of the points with Dirichlet (D) conditions</p></li>
+<li><p>c_D / c_D_X, c_D_Y, c_D_Z: values of the D conditions for scalar/laminar</p></li>
+<li><p>X_N, Y_N, Z_N: coordinates of the points with Neumann (N) conditions</p></li>
+<li><p>n_x, n_y, n_z: normal versors where N conditions are introduced</p></li>
+<li><p>c_N / c_N_X, c_N_Y, c_N_Z: values of the N conditions for scalar/laminar</p></li>
+<li><p>X_Div, Y_Div, Z_Div: coordinates of the points with Div conditions</p></li>
+</ul>
+</dd>
+<dt>If clustering is done:</dt><dd><ul class="simple">
+<li><p>r_mM: vector collecting minimum (m) and maximum (M) radius of the RBFs</p></li>
+<li><p>eps_l: scalar controlling the value of an RBF at the closest RBF neighbor</p></li>
+<li><p>X_C, Y_C, Z_C : coordinates of the cluster centers/collocations</p></li>
+<li><p>c_k: shape parameters of the RBFs</p></li>
+<li><p>d_k: diameters of the rbfs</p></li>
+</ul>
+</dd>
+<dt>If problem is assembled:</dt><dd><ul class="simple">
+<li><p>A: matrix A in the linear system</p></li>
+<li><p>B: matrix B in the linear system</p></li>
+<li><p>b_1: vector b_1 in the linear systems</p></li>
+<li><p>b_2: vector b_2 in the linear system</p></li>
+</ul>
+</dd>
+<dt>If computation is done:</dt><dd><ul class="simple">
+<li><p>weights: weights of the RBF regression</p></li>
+<li><p>lambda: Lagrange multipliers of the RBF regression</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spicy_vki.spicy.Spicy.collocation">
+<span class="sig-prename descclassname"><span class="pre">spicy_vki.spicy.Spicy.</span></span><span class="sig-name descname"><span class="pre">collocation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Areas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'clustering'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_mM</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0.01,</span> <span class="pre">0.3]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps_l</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.7</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spicy_vki.spicy.Spicy.collocation" title="Link to this definition">¶</a></dt>
+<dd><p>This function defines the collocation of a set of RBFs using the multi-
+level clustering first introduced in the article. Note that we modified the slightly original formulation
+to ease the programming; see video tutorials for more.
+The function must be run before the constraint definition.</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.1.0: </span>Renamed to collocation, clustering is deprecated</p>
+</div>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul>
+<li><p><strong>n_K</strong> (<em>list</em>) – This contains the n_k vector in eq (33) in the paper; this is the
+list of expected particles per RBF at each level. For example, if n_K=[4,10],
+it means that the clustering will try to have a first level with RBFs whose size
+seeks to embrace 4 points, while the second level seeks to embrace
+10 points, etc. The length of this vector automatically defines the
+number of levels.</p></li>
+<li><p><strong>Areas</strong> (<em>list, default None</em>) – List of the refinement regions for each clustering level. If no
+refinement is needed, then this should be a list of empty
+lists (default option). Currently not implemented in 3D.
+.. versionchanged:: 1.1.0</p>
+<p>Moved to keyword arguments and initialized as None.</p>
+</li>
+<li><p><strong>bounds</strong> (<em>list, default None</em>) – Limits of the regression domain for semi-random clustering.
+In case it is not desired to use min-max rescaling, these give the limits.</p>
+<ul class="simple">
+<li><p>if <code class="docutils literal notranslate"><span class="pre">dimension</span></code> is ‘2D’, it has to be [x_min, x_max, y_min, y_max].</p></li>
+<li><p>if <code class="docutils literal notranslate"><span class="pre">dimension</span></code> is ‘3D’, it has to be [x_min, x_max, y_min, y_max, z_min, z_max].</p></li>
+</ul>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.1.0.</span></p>
+</div>
+<p>Does not work with <code class="docutils literal notranslate"><span class="pre">Areas</span></code>.</p>
+</li>
+<li><p><strong>method</strong> (<em>str</em>) – default=’clustering’
+Which method to use for placing the collocation points. Before, only clustering
+was possible and this was also the original name of the function. At the moment,
+regular and semirandom require a rectangular domain.</p>
+<ul class="simple">
+<li><p>‘clustering’ uses k-means clustering from the original publication
+<a class="reference external" href="https://arxiv.org/abs/2112.12752">https://arxiv.org/abs/2112.12752</a></p></li>
+<li><p>‘semirandom’ uses halton points which can be beneficial in three dimensions
+<a class="reference external" href="https://www.worldscientific.com/worldscibooks/10.1142/6437#t=aboutBook">https://www.worldscientific.com/worldscibooks/10.1142/6437#t=aboutBook</a></p></li>
+<li><p>‘regular’ uses a regular grid of collocation points</p></li>
+</ul>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.1.0.</span></p>
+</div>
+</li>
+<li><p><strong>r_mM</strong> (<em>list of two float values, default=[0.01, 0.3].</em>) – This contains the minimum and the maximum RBF’s radiuses. This is
+defined as the distance from the collocation point at which the RBF
+value is 0.5.</p></li>
+<li><p><strong>eps_l</strong> (<em>float, default=0.7.</em>) – This is the value that a RBF will have at its closest neighbour. It
+is used to define the shape factor from the clustering results.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Assigns<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>r_mM</strong> (<em>list of length 2</em>) – Minimum and maximum RBF radius.</p></li>
+<li><p><strong>els_l</strong> (<em>float</em>) – Value of an RBF at its closes neighbor.</p></li>
+<li><p><strong>X_C, Y_C, (Z_C)</strong> (<em>1D numpy.ndarrays</em>) – Collocation points of the RBFs in 2D (3D).</p></li>
+<li><p><strong>c_k, d_k</strong> (<em>1D numpy.ndarrays</em>) – Shape parameter and diamaeter of each RBF.</p></li>
+<li><p><strong>clust_list</strong> (<em>1D numpy.ndarray</em>) – Contains the clustering level of each RBF.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spicy_vki.spicy.Spicy.scalar_constraints">
+<span class="sig-prename descclassname"><span class="pre">spicy_vki.spicy.Spicy.</span></span><span class="sig-name descname"><span class="pre">scalar_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DIR</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NEU</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_RBF</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spicy_vki.spicy.Spicy.scalar_constraints" title="Link to this definition">¶</a></dt>
+<dd><p>This functions sets the boundary conditions for a scalar problem. The
+function must be run after the clustering is carried out.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul>
+<li><p><strong>DIR</strong> (<em>list of 1D numpy.ndarray</em>) – This contains the info for the Dirichlet conditions:</p>
+<ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">dimension</span></code> = ‘2D’, it has to be [X_D, Y_D, c_D1, …, c_Dn]</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">dimension</span></code> = ‘3D’, it has to be [X_D, Y_D, Z_D, c_D1, …, c_Dn]</p></li>
+</ul>
+<p>Here X_D, Y_D, Z_D are the coordinates of the points where the value
+c_D1, …, c_Dn are set. This allows to reuse constraints for a scalar
+regression, assuming they are set in the same points.</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.1.0: </span>Since multiple regressions can now share computations for scalar
+regressions, the input can now accept a constraint value for
+every individual regression. The API remains the same in the case
+of regressing a single scalar</p>
+</div>
+</li>
+<li><p><strong>NEU</strong> (<em>list of 1D numpy.ndarray</em>) – This contains the info for the Neumann conditions:</p>
+<ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">dimension</span></code> = ‘2D’, it has to be [X_N, Y_N, n_x, n_y, c_N]</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">dimension</span></code> = ‘3D’, it has to be [X_N, Y_N, Z_N, n_x, n_y, n_z, c_N]</p></li>
+</ul>
+<p>Here X_N, Y_N, Z_N are the coordinates of the points where the values
+cN1, …, c_Nn are set for the directional derivative along the normal
+direction n_x, n_y, n_z.</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.1.0: </span>Since multiple regressions can now share computations for scalar
+regressions, the input can now accept a constraint value for
+every individual regression. The API remains the same in the case
+of regressing a single scalar</p>
+</div>
+</li>
+<li><p><strong>extra_RBF</strong> (<em>bool, default=True.</em>) – This is a flag to put extra collocation points where a constraint is
+set. It can improve the solution of the linear system as constraints
+remove degrees of freedom.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Assigns<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>X_D, Y_D, (Z_D)</strong> (<em>1D numpy.ndarrays</em>) – Dirichlet constraints in 2D (3D).</p></li>
+<li><p><strong>X_N, Y_N, (Z_N)</strong> (<em>1D numpy.ndarrays</em>) – Neumann constraints in 2D (3D).</p></li>
+<li><p><strong>c_D</strong> (<em>2D numpy.ndarray of size (n_D, n_q)</em>) – Dirichlet constraints to be applied for the n_q quantities.</p></li>
+<li><p><strong>c_N</strong> (<em>2D numpy.ndarray of size (n_N, n_q)</em>) – Neumann constraints to be applied for the n_q quantities.</p></li>
+<li><p><strong>n_x, n_y, (n_z)</strong> (<em>1D numpy.ndarrays</em>) – Normals of the Neumann constraints to be applied.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spicy_vki.spicy.Spicy.vector_constraints">
+<span class="sig-prename descclassname"><span class="pre">spicy_vki.spicy.Spicy.</span></span><span class="sig-name descname"><span class="pre">vector_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DIR</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NEU</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DIV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_RBF</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spicy_vki.spicy.Spicy.vector_constraints" title="Link to this definition">¶</a></dt>
+<dd><p># This functions sets the boundary conditions for a laminar problem. The
+function must be run after the clustering was carried out.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul>
+<li><p><strong>DIR</strong> (<em>list of 1D numpy.ndarray, default=[].</em>) – This contains the info for the Dirichlet conditions. There are two
+options:</p>
+<ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">dimension</span></code> = ‘2D’, it has to be [X_D, Y_D, c_D_X, c_D_Y]</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">dimension</span></code> = ‘3D’, it has to be [X_D, Y_D, Z_D, c_D_X, c_D_Y, c_D_Z]</p></li>
+</ul>
+<p>Here X_D, Y_D, Z_D are the coordinates of the points where the values
+c_D_X, c_D_Y, c_D_Z are set.</p>
+</li>
+<li><p><strong>NEU</strong> (<em>list of 1D numpy.ndarray, default=[].</em>) – This contains the info for the Dirichlet conditions. There are two
+options:</p>
+<ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">dimension</span></code> = ‘2D’, it has to be [X_N, Y_N, n_x, n_y, c_N_X, c_N_Y]</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">dimension</span></code> = ‘3D’, it has to be [X_N, Y_N, Z_N, n_x, n_y, n_z, c_N_X, c_N_Y, c_N_Z]</p></li>
+</ul>
+<p>Here X_N, Y_N, Z_N are the coordinates of the points where the values
+c_N_X, c_N_Y, c_N_Z are set for the directional derivative along the
+normal direction n_x, n_y, n_z.</p>
+</li>
+<li><p><strong>DIV</strong> (<em>list of 1D numpy.ndarray, default=[].</em>) – This contains the info for the divergence-free conditions. There
+are two options:</p>
+<ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">dimension</span></code> = ‘2D’, it has to be [X_Div, Y_Div]</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">dimension</span></code> = ‘3D’, it has to be [X_Div, Y_Div, Z_Div]</p></li>
+</ul>
+<p>Here X_Div, Y_Div, Z_Div are the coordinates of the points where the
+divergence-free condition is imposed.</p>
+</li>
+<li><p><strong>extra_RBF</strong> (<em>bool, default=True.</em>) – This is a flag to put extra collocation points where a constraint is
+set. It can improve the solution of the linear system as constraints
+remove degrees of freedom</p></li>
+</ul>
+</dd>
+<dt class="field-even">Assigns<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>X_D, Y_D, (Z_D)</strong> (<em>1D numpy.ndarrays</em>) – Dirichlet constraints in 2D (3D).</p></li>
+<li><p><strong>X_N, Y_N, (Z_N)</strong> (<em>1D numpy.ndarrays</em>) – Neumann constraints in 2D (3D).</p></li>
+<li><p><strong>c_D_X, c_D_Y, (c_D_Z)</strong> (<em>dd numpy.ndarrays</em>) – Dirichlet constraints to be applied for the three velocities.</p></li>
+<li><p><strong>c_N_X, c_N_Y, (c_N_Z)</strong> (<em>dd numpy.ndarrays</em>) – Dirichlet constraints to be applied for the three velocities.</p></li>
+<li><p><strong>n_x, n_y, (n_z)</strong> (<em>1D numpy.ndarrays</em>) – Normals of the Neumann constraints to be applied.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spicy_vki.spicy.Spicy.plot_RBFs">
+<span class="sig-prename descclassname"><span class="pre">spicy_vki.spicy.Spicy.</span></span><span class="sig-name descname"><span class="pre">plot_RBFs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_skip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spicy_vki.spicy.Spicy.plot_RBFs" title="Link to this definition">¶</a></dt>
+<dd><p>Utility function to check the spreading of the RBFs after the clustering.
+This function generates several plots. It produces no new variable in SPICY.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul>
+<li><p><strong>level</strong> (<em>int, default 0</em>) – This defines the cluster level of RBF that will be visualized.</p></li>
+<li><p><strong>plot_skip</strong> (<em>int, default 1</em>) – Only every plot_skip’th point will be plotted to save cost for large datasets.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.1.0.</span></p>
+</div>
+</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spicy_vki.spicy.Spicy.Assembly_Poisson">
+<span class="sig-prename descclassname"><span class="pre">spicy_vki.spicy.Spicy.</span></span><span class="sig-name descname"><span class="pre">Assembly_Poisson</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_hb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spicy_vki.spicy.Spicy.Assembly_Poisson" title="Link to this definition">¶</a></dt>
+<dd><p>This function assembly the matrices A, B, b_1, b_2 for the Poisson problem.
+These are eqs. (31a) - (31d) in the original paper (see also video tutorial 1 for more info)</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>n_hb</strong> (<em>int, default 0</em>) – When solving the Poisson equation, global basis elements such as polynomials or series
+expansions can be of great help. This is evident if one note that the eigenfunctions of
+the Laplace operator are harmonics.
+In a non-homogeneous problem, once could homogenize the basis. This will be proposed for the next relase
+(which will align with Manuel’s paper). The idea is the following: if the homogeneization is well done and
+the basis is well chosen, then we do not need constraints for these extra terms of the basis.</p>
+<p>For the moment, we let the user introduce the number of extra_basis.
+These will be sine and cosine bases, which are orthogonal in [-1,1].
+In 1D, they are defined as : sines_n=np.sin(2*np.pi*(n)*x); cos_n=np.cos(np.pi/2*(2*n+1)*x)
+Given n_hb, we will have that the first n_hb are sines the last n_hb will be cosines.
+This defines the basis phi_h_n, with n an index from 0 to n_hb**4 in 2D.</p>
+<p>In 2D, assuming separation of variables, we will take phi_h_nm=phi_n(x)*phi_m(y).
+Similarly, in 3D will be phi_nmk=phi_n(x)*phi_m(y)*phi_k(z).
+For stability purposes, the largest tolerated value at the moment is 10!.</p>
+<p>For an homogeneous problem, the chosen basis needs no constraints.</p>
+<p>Warning: This feature is currently under development.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spicy_vki.spicy.Spicy.Assembly_Regression">
+<span class="sig-prename descclassname"><span class="pre">spicy_vki.spicy.Spicy.</span></span><span class="sig-name descname"><span class="pre">Assembly_Regression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_hb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_div</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spicy_vki.spicy.Spicy.Assembly_Regression" title="Link to this definition">¶</a></dt>
+<dd><p>This function assembly the matrices A, B, C, D from the paper (see video tutorial 1).</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul>
+<li><p><strong>n_hb</strong> (<em>int, default 0</em>) – Also for a regression, the harmonic basis can improve the regression
+as they can model global trends which are similar to a low order
+polynomial. Furthermore, for homogenous problem, they automatically
+fulfill the boundary conditions.</p>
+<p>See the same entry in the function ‘Assembly_Poisson’</p>
+</li>
+<li><p><strong>alpha_div</strong> (<em>float, default None</em>) – This enables a divergence free penalty in the entire flow field.
+The higher this parameter, the more SPICY penalizes errors in the divergence-free
+condition. This is particularly important to obtain good derivatives
+for the pressure computation.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spicy_vki.spicy.Spicy.Solve">
+<span class="sig-prename descclassname"><span class="pre">spicy_vki.spicy.Spicy.</span></span><span class="sig-name descname"><span class="pre">Solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K_cond</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000000000000.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spicy_vki.spicy.Spicy.Solve" title="Link to this definition">¶</a></dt>
+<dd><p>This function solves the constrained quadratic problem A, B, b_1, b_2.
+The method is universal for 2D/3D problems as well as laminar/Poisson problems.</p>
+<p>The input parameters are the class itself and the desired condition
+number of A which is fixed based on its largest and smallest eigenvalue</p>
+<p>The function assigns the weights ‘w’ and the Lagrange multipliers
+Lambda to the class. The weights are computed for the min/max scaled problem,
+i.e. the right hand-side of the linear system is normalized. The assigned
+weights are rescaled by self.scale_U to get the real, physical quantities</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>K_cond</strong> (<em>int, default 1e12.</em>) – This is the regularization parameter. It fixes the condition number (see Video 1)
+The estimation is based such that the regularize matrix has the condition
+number k_cond. For this, we compute the max and the min eigenvalue.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spicy_vki.spicy.Spicy.get_sol">
+<span class="sig-prename descclassname"><span class="pre">spicy_vki.spicy.Spicy.</span></span><span class="sig-name descname"><span class="pre">get_sol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spicy_vki.spicy.Spicy.get_sol" title="Link to this definition">¶</a></dt>
+<dd><p>This function evaluates the solution of the linear system on an arbitrary set of points.
+The function is used for both the function itself as well as the analytical derivatives.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul>
+<li><p><strong>points</strong> (<em>1D numpy.ndarray</em>) – Contains the points at which the source term is evaluated</p>
+<ul class="simple">
+<li><p>if <code class="docutils literal notranslate"><span class="pre">dimension</span></code> is ‘2D’, it has to be [X_P, Y_P].</p></li>
+<li><p>if <code class="docutils literal notranslate"><span class="pre">dimension</span></code> is ‘3D’, it has to be [X_P, Y_P, Z_P].</p></li>
+</ul>
+</li>
+<li><p><strong>order</strong> (<em>1D numpy.ndarray, default 0</em>) – Order of the derivative solution</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">order</span></code> = 0 : Function without any derivative</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">order</span></code> = 1 : First derivative</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">order</span></code> = 2 : Second derivative</p></li>
+<li><p>…</p></li>
+</ul>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.1.0.</span></p>
+</div>
+</li>
+<li><p><strong>shape</strong> (<em>tuple, default None</em>) – Shape in which to reshape the solution arrays. This is a QOL feature.
+The product of the tuple entries has to have the same length as the point array.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p><strong>U_sol</strong> – The solution always depends on <code class="docutils literal notranslate"><span class="pre">model</span></code> = ‘scalar’/’laminar’ and <code class="docutils literal notranslate"><span class="pre">dimension</span></code> = ‘2D’/’3D’
+If order = 0, give the original function</p>
+<ul class="simple">
+<li><p>If scalar, the solution is [U1_sol, … Un_sol].</p></li>
+<li><p>If laminar and 2D, the solution is [U_sol, V_sol]</p></li>
+<li><p>If laminar and 3D, the solution is [U_sol, V_sol, W_sol]</p></li>
+</ul>
+<p>If the scalar solution is only [U1_sol], it is returned as U1_sol
+so that a list of length 1 does not need to be unpacked by the user.</p>
+<p>If order == 1, give the first derivative of all quantities</p>
+<ul class="simple">
+<li><p>If ‘scalar’ and ‘2D’, the output is [dU1DX, dU1DY, …, dUndx, dUndy]</p></li>
+<li><p>If ‘scalar’ and ‘3D’, the output is [dU1DX, dU1DY, dU1DZ, …, dUndx, dUndy, dUndz]</p></li>
+<li><p>If ‘laminar’ and ‘2D’, the solution is [dUdx, dUdY, dVdX, dVdY]</p></li>
+<li><p>If ‘laminar’ and ‘3D’, the solution is [dUdx, dUdY, dUdX, dVdX, dVdY, dVdX, dWdX, dWdY, dWdX]</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of numpy.ndarray or numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spicy_vki.spicy.Spicy.get_source_term">
+<span class="sig-prename descclassname"><span class="pre">spicy_vki.spicy.Spicy.</span></span><span class="sig-name descname"><span class="pre">get_source_term</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spicy_vki.spicy.Spicy.get_source_term" title="Link to this definition">¶</a></dt>
+<dd><p>This function evaluates the source term on the right hand side of
+equation (21) in the paper (see video tutorial 1 for more info).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>points</strong> (<em>list of 1D numpy.ndarrays</em>) – Contains the points at which the source term is evaluated.
+If the model is 2D, then this has [X_P, Y_P].
+If the model is 3D, then this has [X_P, Y_P, Z_P].</p></li>
+<li><p><strong>rho</strong> (<em>float</em>) – Density of the fluid. Has to be a float number.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>source_term</strong> – Normal pressure in equation (29) evaluated in the given points.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>1D numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spicy_vki.spicy.Spicy.get_pressure_neumann">
+<span class="sig-prename descclassname"><span class="pre">spicy_vki.spicy.Spicy.</span></span><span class="sig-name descname"><span class="pre">get_pressure_neumann</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spicy_vki.spicy.Spicy.get_pressure_neumann" title="Link to this definition">¶</a></dt>
+<dd><p>This function evaluates the Neumann boundary conditions for the pressure integration in equation (29) from
+Sperotto et al. (2022) (see video tutorial 1 for more info)</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul>
+<li><p><strong>points</strong> (<em>list</em>) – Contains the points at which the Neumann constraint is evaluated. There are two options:</p>
+<ul class="simple">
+<li><p>If the model is 2D, then this has [X_P, Y_P].</p></li>
+<li><p>If the model is 3D, then this has [X_P, Y_P, Z_P].</p></li>
+</ul>
+</li>
+<li><p><strong>normals</strong> (<em>list</em>) –</p>
+<p>Contains normals of the points at which the Neumann constraint is evaluated. There are two options:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>If the model is 2D, then this has [n_x, n_y].</p></li>
+<li><p>If the model is 3D, then this has [n_x, n_y, n_z].</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p><strong>rho</strong> (<em>float</em>) – Density of the fluid. Must be larger than 0.</p></li>
+<li><p><strong>mu</strong> (<em>float</em>) – Dynamic viscosity of the fluid. Must be larger than 0.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>P_neu</strong> – Normal pressure in equation (29) evaluated in the given points.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>1D numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="material.html" class="btn btn-neutral float-left" title="SPICY: References and material" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="version_history.html" class="btn btn-neutral float-right" title="Release History" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, P. Sperotto, M. Ratz, M. A. Mendez.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,15 @@
+MANIFEST.in
+README.md
+setup.py
+spicy_vki/__init__.py
+spicy_vki/spicy.py
+spicy_vki.egg-info/PKG-INFO
+spicy_vki.egg-info/SOURCES.txt
+spicy_vki.egg-info/dependency_links.txt
+spicy_vki.egg-info/requires.txt
+spicy_vki.egg-info/top_level.txt
+spicy_vki/utils/_basis_Harmonic.py
+spicy_vki/utils/_basis_RBF.py
+spicy_vki/utils/_basis_collocation.py
+spicy_vki/utils/_extnumpy.py
+spicy_vki/utils/_input_checks.py
