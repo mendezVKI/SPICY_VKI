@@ -4,3 +4,4 @@ scipy>=1.5
 shapely>=1.7.0
 matplotlib>=3.3.0
 numpydoc>=1.6.0
+sphinx>=5.0
