@@ -6,3 +6,4 @@ matplotlib>=3.3.0
 numpydoc>=1.6.0
 sphinx>=5.0
 sphinx_rtd_theme
+ipython
