@@ -1,1 +1,0 @@
-Dataset for the two test cases in the paper ``A meshless data-tailored approach to compute statistics from scattered data with adaptive radial basis functions''

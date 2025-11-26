@@ -27,7 +27,7 @@ SPICY
 The repository contains the codes linked to the SPICY project (Super-resolution and Pressure from Image veloCimetrY).
 
 SPICY is a software developed at the von Karman Institute to perform data assimilation of image velocimetry using constrained Radial Basis Functions (RBF). 
-The framework works for structured data (as produced by cross-correlation-based algorithms in PIV or Optical FlowS) and unstructured data (produced by tracking algorithms in PTV).
+The framework works for structured data (as produced by cross-correlation-based algorithms in PIV or Optical Flows) and unstructured data (produced by tracking algorithms in PTV).
 
 While the main scope is the assimilation of velocity fields, SPICY can also be used for the regression of other fields (e.g., temperature fields).
 The theoretical foundation of the constrained RBF approach is described in - P. Sperotto, S. Pieraccini, M.A. Mendez, A Meshless Method to Compute Pressure Fields from Image Velocimetry, Measurement Science and Technology 33(9), May 2022. (pre-print at https://arxiv.org/abs/2112.12752).
