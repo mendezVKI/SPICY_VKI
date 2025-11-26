@@ -1,6 +1,9 @@
 SPICY_VKI
 ========
 
+This repository contains the code for the SPICY project (Super-resolution and Pressure from Image veloCimetrY, https://arxiv.org/abs/2112.12752). This is the core of SPICY which is in the folder `spicy_vki`.
+It also contains the code to produce the dataset used in an anisotropic adaptation of the SPICY code (code unpublished, https://arxiv.org/abs/2511.20449). The code is contained in the folder `Dataset_Anisotropic_RBF`.
+
 Installation
 ========
 You can install spicy via `pip`: 
